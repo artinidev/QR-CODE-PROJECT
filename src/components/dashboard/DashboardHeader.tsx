@@ -49,7 +49,7 @@ export default function DashboardHeader() {
     ];
 
     return (
-        <header className="bg-white dark:bg-zinc-900/90 backdrop-blur-md dark:border dark:border-white/5 rounded-[2.5rem] p-4 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm sticky top-6 z-[100] mb-8 transition-all duration-300">
+        <header className="bg-white dark:bg-zinc-900/90 backdrop-blur-md dark:border dark:border-white/5 rounded-[2.5rem] p-4 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm sticky top-6 z-[100] mb-14 transition-all duration-300">
             {/* Brand */}
             <div className={`flex items-center gap-3 pl-4 ${isSearchOpen ? 'hidden md:flex' : 'flex'}`}>
                 <div className="w-10 h-10 bg-[#3B82F6] rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
@@ -183,7 +183,10 @@ export default function DashboardHeader() {
                                 </Link>
                             </div>
                             <div className="p-2 border-t border-gray-100 dark:border-white/5">
-                                <button className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors">
+                                <button
+                                    onClick={() => window.location.href = '/api/auth/logout'}
+                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-xl transition-colors"
+                                >
                                     <LogOut className="w-4 h-4" /> Sign Out
                                 </button>
                             </div>

@@ -98,15 +98,15 @@ export default function ThemeStudioPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 flex-shrink-0">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Theme Studio</h1>
-                    <p className="text-muted-foreground mt-1">Design a profile that stands out. Real-time preview.</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Theme Studio</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Design a profile that stands out. Real-time preview.</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-border text-foreground rounded-full font-medium shadow-sm hover:bg-accent transition-all text-sm">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-full font-bold shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-sm">
                         <Share2 className="w-4 h-4" />
                         Share Layout
                     </button>
-                    <button className="flex items-center gap-2 px-5 py-2 bg-primary text-primary-foreground rounded-full font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all">
+                    <button className="flex items-center gap-2 px-5 py-2 bg-[#3B82F6] text-white rounded-full font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 hover:scale-105 transition-all">
                         <Save className="w-4 h-4" />
                         Save Changes
                     </button>
@@ -120,7 +120,7 @@ export default function ThemeStudioPage() {
                 <div className="lg:col-span-7 xl:col-span-8 overflow-y-auto pr-2 custom-scrollbar space-y-6 pb-20">
 
                     {/* 1. Presets Card */}
-                    <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-border/60 shadow-sm">
+                    <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-gray-100 dark:border-white/5 shadow-sm">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
                                 <Sparkles className="w-4 h-4" />
@@ -133,8 +133,8 @@ export default function ThemeStudioPage() {
                                     key={theme.id}
                                     onClick={() => handlePresetSelect(theme)}
                                     className={`relative p-4 rounded-2xl border-2 text-left transition-all duration-300 group overflow-hidden ${currentConfig.id === theme.id
-                                            ? 'border-primary bg-primary/5 ring-1 ring-primary/20 scale-[1.02]'
-                                            : 'border-border/50 hover:border-primary/50 hover:bg-accent/50'
+                                        ? 'border-primary bg-primary/5 ring-1 ring-primary/20 scale-[1.02]'
+                                        : 'border-border/50 hover:border-primary/50 hover:bg-accent/50'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3 mb-3 relative z-10">
@@ -162,7 +162,7 @@ export default function ThemeStudioPage() {
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
                         {/* 2. Colors & Style */}
-                        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-border/60 shadow-sm flex flex-col gap-6">
+                        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-gray-100 dark:border-white/5 shadow-sm flex flex-col gap-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center">
                                     <Palette className="w-4 h-4" />
@@ -197,8 +197,8 @@ export default function ThemeStudioPage() {
                                                 key={style}
                                                 onClick={() => updateConfig('cardStyle', style)}
                                                 className={`px-3 py-2.5 text-xs font-bold rounded-xl border transition-all capitalize ${currentConfig.cardStyle === style
-                                                        ? 'bg-foreground text-background border-foreground shadow-md'
-                                                        : 'bg-muted/30 border-transparent hover:bg-muted text-muted-foreground hover:text-foreground'
+                                                    ? 'bg-foreground text-background border-foreground shadow-md'
+                                                    : 'bg-muted/30 border-transparent hover:bg-muted text-muted-foreground hover:text-foreground'
                                                     }`}
                                             >
                                                 {style}
@@ -210,7 +210,7 @@ export default function ThemeStudioPage() {
                         </div>
 
                         {/* 3. Living Background */}
-                        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-border/60 shadow-sm flex flex-col gap-6">
+                        <div className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-gray-100 dark:border-white/5 shadow-sm flex flex-col gap-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
                                     <Monitor className="w-4 h-4" />
@@ -233,8 +233,8 @@ export default function ThemeStudioPage() {
                                             // @ts-ignore
                                             onClick={() => updateConfig('backgroundAnimation', item.id)}
                                             className={`py-2 text-xs font-medium rounded-lg border transition-all ${currentConfig.backgroundAnimation === item.id
-                                                    ? 'border-primary text-primary bg-primary/5 ring-1 ring-primary/20 font-bold'
-                                                    : 'border-border/50 hover:border-border hover:bg-muted/50'
+                                                ? 'border-primary text-primary bg-primary/5 ring-1 ring-primary/20 font-bold'
+                                                : 'border-border/50 hover:border-border hover:bg-muted/50'
                                                 }`}
                                         >
                                             {item.label}
@@ -249,8 +249,8 @@ export default function ThemeStudioPage() {
                                             key={bg.id}
                                             onClick={() => updateConfig('backgroundColor', bg.value)}
                                             className={`w-12 h-12 rounded-full border-2 flex-shrink-0 relative transition-all ${currentConfig.backgroundColor === bg.value
-                                                    ? 'border-primary scale-110 shadow-md ring-2 ring-primary/20 ring-offset-2'
-                                                    : 'border-border/20 hover:border-border hover:scale-105'
+                                                ? 'border-primary scale-110 shadow-md ring-2 ring-primary/20 ring-offset-2'
+                                                : 'border-border/20 hover:border-border hover:scale-105'
                                                 }`}
                                         >
                                             <div
@@ -268,7 +268,7 @@ export default function ThemeStudioPage() {
 
                 {/* Right Column: Live Preview (Sticky/Fixed in Bento Grid) */}
                 <div className="lg:col-span-5 xl:col-span-4 h-full min-h-[500px]">
-                    <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-border/80 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 h-full flex flex-col relative overflow-hidden ring-1 ring-black/5">
+                    <div className="bg-white dark:bg-zinc-900 rounded-[2.5rem] border border-gray-100 dark:border-white/5 shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 h-full flex flex-col relative overflow-hidden ring-1 ring-black/5">
 
                         {/* Toolbar */}
                         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex bg-white/80 dark:bg-zinc-800/80 backdrop-blur-md p-1 rounded-full border border-black/5 shadow-sm">
@@ -307,8 +307,8 @@ export default function ThemeStudioPage() {
                             {/* Device Mockup */}
                             <div
                                 className={`relative transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-2xl ${previewMode === 'mobile'
-                                        ? 'w-[340px] h-[700px] rounded-[3.5rem] border-[10px] border-[#18181b] bg-black ring-1 ring-black/10'
-                                        : 'w-full h-full max-h-[700px] rounded-2xl border-[10px] border-[#18181b] bg-black ring-1 ring-black/10'
+                                    ? 'w-[340px] h-[700px] rounded-[3.5rem] border-[10px] border-[#18181b] bg-black ring-1 ring-black/10'
+                                    : 'w-full h-full max-h-[700px] rounded-2xl border-[10px] border-[#18181b] bg-black ring-1 ring-black/10'
                                     }`}
                             >
                                 {/* Mobile Notch */}

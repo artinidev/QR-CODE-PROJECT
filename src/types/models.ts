@@ -1,11 +1,40 @@
 import { ObjectId } from 'mongodb';
 
+export interface UserLimits {
+    maxQrCodes: number;
+    maxProfiles: number;
+}
+
+export interface UserFeatures {
+    analytics: boolean;
+    customThemes: boolean;
+    bulkGeneration: boolean;
+    apiAccess: boolean;
+}
+
 export interface User {
     _id?: ObjectId;
     email: string;
-    password: string;
-    role: 'admin' | 'user';
+    password?: string; // Optional for pending users
+    role: 'admin' | 'user' | 'sub-admin';
     status: 'active' | 'suspended' | 'pending';
+    permissions?: string[]; // For sub-admins
+
+    // SaaS Limits & Features
+    limits?: UserLimits;
+    features?: UserFeatures;
+
+    // Invitation System
+    invitationToken?: string;
+    invitationExpires?: Date;
+
+    // Subscription
+    subscription?: {
+        plan: 'free' | 'pro' | 'enterprise';
+        status: 'active' | 'expired' | 'canceled';
+        expiresAt: Date;
+    };
+
     createdAt: Date;
     updatedAt: Date;
 }

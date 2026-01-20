@@ -25,9 +25,15 @@ async function testQR() {
         const loginRes = await request({
             hostname: 'localhost',
             port: 3000,
-            path: '/api/auth/dev-login',
+            path: '/api/auth/login',
             method: 'POST',
-        });
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }, JSON.stringify({
+            email: 'test_agent_1@example.com',
+            password: 'password123'
+        }));
 
         console.log('Login Status:', loginRes.statusCode);
         const setCookie = loginRes.headers['set-cookie'];

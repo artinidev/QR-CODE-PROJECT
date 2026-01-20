@@ -24,13 +24,28 @@ export async function PATCH(
     try {
         const { userId } = await params;
         verifyAdminToken(request);
-        const { status } = await request.json();
+        const body = await request.json();
 
-        if (!['active', 'suspended', 'pending'].includes(status)) {
-            return NextResponse.json(
-                { error: 'Invalid status' },
-                { status: 400 }
-            );
+        // Allowed fields to update
+        const { status, limit, features, subscription, password } = body;
+
+        const updateData: any = { updatedAt: new Date() };
+
+        if (status) {
+            if (!['active', 'suspended', 'pending'].includes(status)) {
+                return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+            }
+            updateData.status = status;
+        }
+
+        if (limit) updateData.limits = limit; // mapped to 'limits' in db
+        if (features) updateData.features = features;
+        if (subscription) updateData.subscription = subscription;
+
+        // Password Reset (Admin Override)
+        if (password) {
+            const bcrypt = require('bcryptjs'); // Dynamically require to avoid top-level if not used elsewhere
+            updateData.password = await bcrypt.hash(password, 10);
         }
 
         const db = await getDatabase();
@@ -38,24 +53,16 @@ export async function PATCH(
 
         const result = await usersCollection.findOneAndUpdate(
             { _id: new ObjectId(userId) },
-            {
-                $set: {
-                    status,
-                    updatedAt: new Date(),
-                },
-            },
+            { $set: updateData },
             { returnDocument: 'after', projection: { password: 0 } }
         );
 
         if (!result) {
-            return NextResponse.json(
-                { error: 'User not found' },
-                { status: 404 }
-            );
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
         return NextResponse.json({
-            message: 'User status updated successfully',
+            message: 'User updated successfully',
             user: result,
         });
     } catch (error: any) {

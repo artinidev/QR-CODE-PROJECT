@@ -30,7 +30,6 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
     const [bulkInput, setBulkInput] = useState('https://site1.com, Site One\nhttps://site2.com, Site Two');
 
     // QR Configuration State
-    // QR Configuration State
     const [url, setUrl] = useState(initialUrl);
     const [name, setName] = useState('My QR Code');
     const [isDynamic, setIsDynamic] = useState(false);
@@ -223,16 +222,16 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                 {/* Column 1: Configuration & Inputs (3/12) */}
                 <div className="lg:col-span-3 flex flex-col gap-4 border-r border-gray-100 dark:border-white/5 pr-0 lg:pr-4">
                     {/* Mode Switcher */}
-                    <div className="bg-gray-100 dark:bg-zinc-800 p-1 rounded-full inline-flex self-start">
+                    <div className="bg-gray-100 dark:bg-zinc-950 p-1 rounded-full inline-flex self-start">
                         <button
                             onClick={() => setMode('single')}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${mode === 'single' ? 'bg-white dark:bg-zinc-700 text-black dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white'}`}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${mode === 'single' ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white'}`}
                         >
                             Single
                         </button>
                         <button
                             onClick={() => setMode('bulk')}
-                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${mode === 'bulk' ? 'bg-white dark:bg-zinc-700 text-black dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white'}`}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition-all ${mode === 'bulk' ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white'}`}
                         >
                             Bulk
                         </button>
@@ -256,7 +255,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                                         type="text"
                                         value={targetUrl}
                                         onChange={(e) => setTargetUrl(e.target.value)}
-                                        className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600"
+                                        className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600"
                                         placeholder="https://example.com"
                                     />
                                     {isDynamic && (
@@ -275,7 +274,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                                         type="text"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600"
+                                        className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600"
                                         placeholder="QR Name"
                                     />
                                 </div>
@@ -286,7 +285,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                                 <textarea
                                     value={bulkInput}
                                     onChange={(e) => setBulkInput(e.target.value)}
-                                    className="flex-1 w-full bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-[10px] font-mono focus:ring-2 focus:ring-blue-500/20 outline-none resize-none text-gray-900 dark:text-white"
+                                    className="flex-1 w-full bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-[10px] font-mono focus:ring-2 focus:ring-blue-500/20 outline-none resize-none text-gray-900 dark:text-white"
                                     placeholder="url, name..."
                                 />
                             </div>
@@ -295,7 +294,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                 </div>
 
                 {/* Column 2: The Stage / Preview (5/12) */}
-                <div className="lg:col-span-5 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-gray-100/50 dark:border-white/5 p-6 relative group">
+                <div className="lg:col-span-5 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-zinc-950/50 rounded-2xl border border-gray-100/50 dark:border-white/5 p-6 relative group">
                     <div ref={ref} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 dark:border-none transform transition-transform group-hover:scale-105 duration-300" />
                     <p className="absolute bottom-2 text-[9px] font-bold text-gray-300 dark:text-gray-500 uppercase tracking-widest pointer-events-none">Live Preview</p>
                 </div>
@@ -305,7 +304,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                     <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[300px] scrollbar-thin">
                         {/* Templates */}
                         <div className="border border-gray-100 dark:border-white/10 rounded-lg overflow-hidden">
-                            <button onClick={() => toggleSection('templates')} className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors">
+                            <button onClick={() => toggleSection('templates')} className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-950 hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
                                 <div className="flex items-center gap-2 font-bold text-[10px] text-gray-600 dark:text-gray-300"><Layers className="w-3 h-3 text-blue-500" /> TEMPLATES</div>
                                 {activeSection === 'templates' ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                             </button>
@@ -323,7 +322,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
 
                         {/* Pattern */}
                         <div className="border border-gray-100 dark:border-white/10 rounded-lg overflow-hidden">
-                            <button onClick={() => toggleSection('pattern')} className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors">
+                            <button onClick={() => toggleSection('pattern')} className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-950 hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
                                 <div className="flex items-center gap-2 font-bold text-[10px] text-gray-600 dark:text-gray-300"><Grid className="w-3 h-3 text-blue-500" /> PATTERN</div>
                                 {activeSection === 'pattern' ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                             </button>
@@ -340,7 +339,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
 
                         {/* Color */}
                         <div className="border border-gray-100 dark:border-white/10 rounded-lg overflow-hidden">
-                            <button onClick={() => toggleSection('color')} className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors">
+                            <button onClick={() => toggleSection('color')} className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-950 hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
                                 <div className="flex items-center gap-2 font-bold text-[10px] text-gray-600 dark:text-gray-300"><Palette className="w-3 h-3 text-blue-500" /> COLOR</div>
                                 {activeSection === 'color' ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                             </button>
@@ -354,14 +353,14 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
 
                         {/* Logo - NEW SECTION */}
                         <div className="border border-gray-100 dark:border-white/10 rounded-lg overflow-hidden">
-                            <button onClick={() => toggleSection('logo')} className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-800 hover:bg-gray-100 dark:hover:bg-zinc-700 transition-colors">
+                            <button onClick={() => toggleSection('logo')} className="w-full flex items-center justify-between p-2.5 bg-gray-50 dark:bg-zinc-950 hover:bg-gray-100 dark:hover:bg-zinc-900 transition-colors">
                                 <div className="flex items-center gap-2 font-bold text-[10px] text-gray-600 dark:text-gray-300"><ImageIcon className="w-3 h-3 text-blue-500" /> LOGO</div>
                                 {activeSection === 'logo' ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                             </button>
                             {activeSection === 'logo' && (
                                 <div className="p-3 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-white/5 space-y-3">
                                     <div className="flex items-center gap-2">
-                                        <label className="flex-1 cursor-pointer bg-gray-50 dark:bg-white/5 border border-dashed border-gray-200 dark:border-white/10 rounded-lg p-2 text-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                                        <label className="flex-1 cursor-pointer bg-gray-50 dark:bg-zinc-950 border border-dashed border-gray-200 dark:border-white/10 rounded-lg p-2 text-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                                             <div className="flex flex-col items-center gap-1">
                                                 <Upload className="w-4 h-4 text-gray-400" />
                                                 <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400">Upload Logo</span>

@@ -115,8 +115,8 @@ export default function AnalyticsPage() {
         <div className="flex-1 overflow-auto p-4 lg:p-8 space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Intelligence Dashboard</h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Real-time insights into your digital footprint.</p>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Intelligence Dashboard</h1>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Real-time insights into your digital footprint.</p>
                 </div>
 
                 {/* Custom searchable combobox for 200+ profiles */}
@@ -124,7 +124,7 @@ export default function AnalyticsPage() {
                     <div className="relative">
                         <button
                             onClick={() => setIsOpen(!isOpen)}
-                            className="w-full flex items-center justify-between bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-zinc-800 text-foreground text-xs font-medium rounded-xl px-4 py-2.5 shadow-sm transition-all focus:ring-2 focus:ring-primary/20 outline-none"
+                            className="w-full flex items-center justify-between bg-white dark:bg-zinc-900 hover:bg-gray-50 dark:hover:bg-zinc-800 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-200 text-xs font-bold rounded-xl px-4 py-2.5 shadow-sm transition-all focus:ring-2 focus:ring-blue-500/20 outline-none"
                         >
                             <span className="truncate">
                                 {selectedProfileId
@@ -140,8 +140,8 @@ export default function AnalyticsPage() {
                                     className="fixed inset-0 z-30"
                                     onClick={() => setIsOpen(false)}
                                 />
-                                <div className="absolute top-full mt-2 w-full bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-xl z-40 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                                    <div className="p-2 border-b border-gray-100 dark:border-zinc-800">
+                                <div className="absolute top-full mt-2 w-full bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/10 rounded-xl shadow-xl z-40 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                                    <div className="p-2 border-b border-gray-100 dark:border-white/5">
                                         <div className="relative">
                                             <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                                             <input
@@ -150,7 +150,7 @@ export default function AnalyticsPage() {
                                                 placeholder="Search profiles..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="w-full bg-gray-50 dark:bg-zinc-800 border-none rounded-lg pl-9 pr-3 py-2 text-xs outline-none focus:ring-1 focus:ring-primary/50 transition-all font-medium"
+                                                className="w-full bg-gray-50 dark:bg-zinc-950 border-none rounded-lg pl-9 pr-3 py-2 text-xs outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-medium text-gray-900 dark:text-white"
                                                 autoFocus
                                             />
                                         </div>
@@ -175,7 +175,7 @@ export default function AnalyticsPage() {
                                                 }}
                                                 className={`w-full flex items-center gap-3 px-3 py-2 text-xs rounded-lg transition-colors text-left ${selectedProfileId === p._id
                                                     ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-semibold'
-                                                    : 'hover:bg-gray-100 dark:hover:bg-zinc-800 text-foreground'
+                                                    : 'hover:bg-gray-50 dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300'
                                                     }`}
                                             >
                                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold ${selectedProfileId === p._id ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
@@ -199,7 +199,7 @@ export default function AnalyticsPage() {
             {/* Top Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Card 1 */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Total Scans</p>
                         <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -215,7 +215,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Card 2 */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Unique Visitors</p>
                         <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
@@ -231,7 +231,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Card 3 */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Avg. Time</p>
                         <div className="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center">
@@ -247,7 +247,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Card 4 */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Top Location</p>
                         <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -267,7 +267,7 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* Traffic Chart (Span 2) */}
-                <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+                <div className="lg:col-span-2 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-6 shadow-sm">
                     <div className="flex items-center justify-between mb-6">
                         <h3 className="font-bold text-gray-800 dark:text-gray-100">Scan Performance</h3>
                         <div className="flex gap-2">
@@ -299,7 +299,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Live Feed (Span 1) */}
-                <div className="lg:col-span-1 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm flex flex-col h-[350px]">
+                <div className="lg:col-span-1 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-6 shadow-sm flex flex-col h-[350px]">
                     <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center justify-between">
                         <span>Live Activity</span>
                         <span className="relative flex h-2.5 w-2.5">
@@ -339,7 +339,7 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 {/* Device Distribution */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-6 shadow-sm">
                     <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-6 text-sm">Device Breakdown</h3>
                     <div className="space-y-4">
                         {deviceData.map((item) => (
@@ -363,11 +363,11 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* OS Stats */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-6 shadow-sm">
                     <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-6 text-sm">Operating System</h3>
                     <div className="grid grid-cols-2 gap-4">
                         {osData.map((os) => (
-                            <div key={os.name} className="bg-gray-50 dark:bg-zinc-800/50 p-3 rounded-xl border border-gray-100/50">
+                            <div key={os.name} className="bg-gray-50 dark:bg-zinc-950/50 p-3 rounded-2xl border border-gray-100 dark:border-white/5">
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{os.name}</p>
                                 <p className="text-xl font-bold text-gray-800 dark:text-gray-200">{os.value}%</p>
                             </div>
@@ -376,7 +376,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Geographic Top Cities */}
-                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
+                <div className="bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 rounded-3xl p-6 shadow-sm">
                     <h3 className="font-bold text-gray-800 dark:text-gray-100 mb-6 text-sm">Top Cities</h3>
                     <div className="space-y-3">
                         {cityData.map((city, index) => (
