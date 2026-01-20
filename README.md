@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PDI Platform - Advanced QR Code & Profile Management System
 
-## Getting Started
+A comprehensive Next.js application for managing dynamic QR codes, user profiles, and analytics.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Getting Started
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Follow these instructions to get the project up and running on your local machine for development.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prerequisites
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+*   [Node.js](https://nodejs.org/) (v18 or higher recommended)
+*   [MongoDB](https://www.mongodb.com/) (Local installation or Atlas URI)
+*   [Git](https://git-scm.com/)
 
-## Learn More
+### 🛠 Installation
 
-To learn more about Next.js, take a look at the following resources:
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/artinidev/QR-CODE-PROJECT.git
+    cd QR-CODE-PROJECT
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2.  **Install dependencies**
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### ⚙️ Environment Configuration
 
-## Deploy on Vercel
+1.  Copy the example environment file:
+    ```bash
+    cp .env.example .env.local
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2.  Open `.env.local` and configure your settings:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    *   **MONGODB_URI**: Connection string for your MongoDB database.
+    *   **JWT_SECRET**: Random string used to sign session tokens.
+    *   **SMTP Settings**: needed for sending email invitations.
+        *   For **Development**: The app is pre-configured to log emails to the console or use Ethereal (dummy email service).
+        *   For **Production**: Add your Gmail/SendGrid credentials.
+
+### 🏃‍♂️ Running the Application
+
+1.  **Start the development server**
+    ```bash
+    npm run dev
+    ```
+
+2.  Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🔐 Admin Setup (Important)
+
+To access the dashboard, you need a Super Admin account.
+
+1.  **Run the Admin Creation Script**:
+    ```bash
+    npx tsx src/scripts/create-admin.ts
+    ```
+    This will create a default admin user:
+    *   **Email**: `admin@pdi.com`
+    *   **Password**: `admin123`
+
+2.  Log in at `/auth/login` with these credentials.
+3.  **Security Tip**: Change this password immediately after logging in via the Settings page.
+
+---
+
+## ✨ Key Features
+
+### 1. User Management
+*   **Invite Users**: Send email invitations with secure magic links or pre-set credentials.
+*   **Role Based Access**: Admins can manage user limits (QR codes, profiles).
+*   **Real-time status**: Track user activation status (Active/Pending/Suspended).
+
+### 2. QR Studio
+*   **Dynamic QR Codes**: Create QR codes that can suffer content updates without changing the printed code.
+*   **Customization**: Change colors, patterns, and add logos.
+*   **Download Formats**: SVG, PNG, PDF.
+
+### 3. Analytics & Contacts
+*   **Scan Tracking**: Monitor where and when QR codes are scanned.
+*   **Contact Management**: Collect and manage leads from public profiles.
+
+---
+
+## 🤝 Collaborators
+
+*   **Project Lead**: Ayoub Designs
+*   **Developer**: [Access Granted via GitHub]
+
+For access issues, please contact the repository owner.
