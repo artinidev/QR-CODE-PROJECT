@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import AdvancedQRGenerator from '@/components/dashboard/AdvancedQRGenerator';
 import { Trash2, Smartphone, MapPin, Clock, BarChart3, QrCode, Download, Share2, Eye, Settings, Copy, CheckCircle } from 'lucide-react';
 
@@ -22,60 +23,129 @@ interface SavedQR {
 
 export default function QRStudioPage() {
     const [activeTab, setActiveTab] = useState<'create' | 'manage'>('create');
-    const [savedQRs, setSavedQRs] = useState<SavedQR[]>([
-        {
-            id: '1',
-            name: 'Personal Portfolio',
-            url: 'https://ayoub.design',
-            isDynamic: true,
-            shortUrl: 'https://qr.ayoub.link/pfolio',
-            color: '#2563eb',
-            scans: 124,
-            lastScan: '2 mins ago',
-            location: 'New York, USA',
-            device: 'iPhone 14 Pro',
-            createdAt: '2024-01-15'
-        },
-        {
-            id: '2',
-            name: 'Business Card',
-            url: 'https://linkedin.com/in/ayoub',
-            isDynamic: false,
-            color: '#7c3aed',
-            scans: 85,
-            lastScan: '1 hour ago',
-            location: 'London, UK',
-            device: 'Chrome Desktop',
-            createdAt: '2024-01-10'
-        }
-    ]);
+    const [savedQRs, setSavedQRs] = useState<SavedQR[]>([]);
+    const [deletedQRs, setDeletedQRs] = useState<SavedQR[]>([]);
+    const [showTrash, setShowTrash] = useState(false); // Start empty, fetch on load
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleSaveQR = (data: { url: string; name: string; color: string; image: string | Blob; isDynamic?: boolean; targetUrl?: string }) => {
-        const newQR: SavedQR = {
-            id: Date.now().toString(),
-            name: data.name || 'Untitled QR',
-            url: data.url,
-            shortUrl: data.targetUrl,
-            isDynamic: data.isDynamic,
-            color: data.color,
-            scans: 0,
-            lastScan: 'Never',
-            location: 'N/A',
-            device: 'N/A',
-            createdAt: new Date().toLocaleDateString(),
-            imageBlob: data.image
-        };
-        setSavedQRs([newQR, ...savedQRs]);
-        // Switch to manage tab to see the new QR
-        setActiveTab('manage');
+    // Fetch QRs from API
+    const fetchQRs = async () => {
+        try {
+            const res = await fetch('/api/qr-codes');
+            if (res.ok) {
+                const data = await res.json();
+                setSavedQRs(data.qrCodes.map((qr: any) => ({
+                    id: qr.id,
+                    name: qr.name,
+                    url: qr.targetUrl, // The destination
+                    shortUrl: qr.shortUrl, // The proxy
+                    isDynamic: qr.isDynamic,
+                    color: qr.color,
+                    scans: qr.scans,
+                    lastScan: 'N/A', // Not tracking time yet
+                    createdAt: new Date(qr.createdAt).toLocaleDateString()
+                })));
+            }
+        } catch (err) {
+            console.error('Failed to load QRs:', err);
+        }
     };
 
-    const handleDeleteQR = (id: string) => {
-        setSavedQRs(savedQRs.filter(qr => qr.id !== id));
+    useEffect(() => {
+        fetchQRs();
+        fetchDeletedQRs();
+    }, []);
+
+    const fetchDeletedQRs = async () => {
+        try {
+            const res = await fetch('/api/qr-codes?deletedOnly=true');
+            const data = await res.json();
+            setDeletedQRs(data.qrCodes || []);
+        } catch (err) {
+            console.error('Error fetching deleted QR codes:', err);
+        }
+    };
+
+    const handleSaveQR = async (data: { url: string; name: string; color: string; image: string | Blob; isDynamic?: boolean; targetUrl?: string }) => {
+        setIsLoading(true);
+        try {
+            const res = await fetch('/api/qr-codes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    targetUrl: data.url, // The user input destination
+                    name: data.name,
+                    color: data.color,
+                    isDynamic: data.isDynamic
+                })
+            });
+
+            if (res.ok) {
+                await fetchQRs(); // Refresh list
+                setActiveTab('manage');
+            } else {
+                alert('Failed to save QR code');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error saving QR code');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const [deletingQR, setDeletingQR] = useState<SavedQR | null>(null);
+
+    const handleDeleteQR = async (id: string) => {
+        try {
+            const res = await fetch(`/api/qr-codes?id=${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setSavedQRs(savedQRs.filter(qr => qr.id !== id));
+                fetchDeletedQRs(); // Refresh trash
+                setDeletingQR(null);
+            } else {
+                alert('Failed to delete QR');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleRestore = async (id: string) => {
+        try {
+            const res = await fetch('/api/qr-codes/restore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            if (res.ok) {
+                fetchQRs();
+                fetchDeletedQRs();
+            } else {
+                alert('Failed to restore QR');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handlePermanentDelete = async (id: string) => {
+        try {
+            const res = await fetch(`/api/qr-codes?id=${id}&permanent=true`, { method: 'DELETE' });
+            if (res.ok) {
+                fetchDeletedQRs();
+            } else {
+                alert('Failed to permanently delete QR');
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState<'all' | 'dynamic' | 'static'>('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 7;
 
     const filteredQRs = savedQRs.filter(qr => {
         const matchesSearch = qr.name.toLowerCase().includes(searchQuery.toLowerCase()) || qr.url.toLowerCase().includes(searchQuery.toLowerCase());
@@ -86,13 +156,39 @@ export default function QRStudioPage() {
         return matchesSearch && matchesType;
     });
 
+    // Pagination logic
+    const totalPages = Math.ceil(filteredQRs.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedQRs = filteredQRs.slice(startIndex, endIndex);
+
+    // Reset to page 1 when search/filter changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery, filterType]);
+
     const [editingQR, setEditingQR] = useState<SavedQR | null>(null);
 
-    const handleUpdateTarget = (id: string, newUrl: string) => {
-        setSavedQRs(savedQRs.map(qr =>
-            qr.id === id ? { ...qr, url: newUrl } : qr
-        ));
-        setEditingQR(null);
+    const handleUpdateTarget = async (id: string, newUrl: string) => {
+        try {
+            const res = await fetch('/api/qr-codes', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, targetUrl: newUrl })
+            });
+
+            if (res.ok) {
+                setSavedQRs(savedQRs.map(qr =>
+                    qr.id === id ? { ...qr, url: newUrl } : qr
+                ));
+                setEditingQR(null);
+            } else {
+                alert('Failed to update target URL');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error updating target URL');
+        }
     };
 
     const [visualizingQR, setVisualizingQR] = useState<SavedQR | null>(null);
@@ -109,35 +205,32 @@ export default function QRStudioPage() {
         }
 
         const generatePreview = async () => {
-            if (targetQR.imageBlob) {
-                const url = targetQR.imageBlob instanceof Blob ? URL.createObjectURL(targetQR.imageBlob) : targetQR.imageBlob as string;
-                setQrPreview(url);
-            } else {
-                try {
-                    const QRCodeStyling = (await import('qr-code-styling')).default;
-                    const qrCode = new QRCodeStyling({
-                        width: 1000,
-                        height: 1000,
-                        data: targetQR.isDynamic && targetQR.shortUrl ? targetQR.shortUrl : targetQR.url,
-                        dotsOptions: {
-                            color: targetQR.color,
-                            type: 'square'
-                        },
-                        backgroundOptions: {
-                            color: '#ffffff',
-                        },
-                        imageOptions: {
-                            crossOrigin: 'anonymous',
-                            margin: 20
-                        }
-                    });
-                    const blob = await qrCode.getRawData('png');
-                    if (blob) {
-                        setQrPreview(URL.createObjectURL(blob as Blob));
+            // Generate fresh preview using latest data
+            try {
+                const QRCodeStyling = (await import('qr-code-styling')).default;
+                const qrCode = new QRCodeStyling({
+                    width: 1000,
+                    height: 1000,
+                    // IMPORANT: PROD change -> use shortUrl if dynamic
+                    data: targetQR.isDynamic && targetQR.shortUrl ? targetQR.shortUrl : targetQR.url,
+                    dotsOptions: {
+                        color: targetQR.color,
+                        type: 'square'
+                    },
+                    backgroundOptions: {
+                        color: '#ffffff',
+                    },
+                    imageOptions: {
+                        crossOrigin: 'anonymous',
+                        margin: 20
                     }
-                } catch (e) {
-                    console.error("Failed to generate preview", e);
+                });
+                const blob = await qrCode.getRawData('png');
+                if (blob) {
+                    setQrPreview(URL.createObjectURL(blob as Blob));
                 }
+            } catch (e) {
+                console.error("Failed to generate preview", e);
             }
         };
 
@@ -242,6 +335,18 @@ export default function QRStudioPage() {
                 >
                     Manage QRs
                 </button>
+                <button
+                    onClick={() => setShowTrash(true)}
+                    className="relative px-4 py-2 rounded-lg text-sm font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all flex items-center gap-2"
+                >
+                    <Trash2 className="w-4 h-4" />
+                    Trash
+                    {deletedQRs.length > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                            {deletedQRs.length}
+                        </span>
+                    )}
+                </button>
             </div>
 
             {/* Content Views */}
@@ -292,97 +397,116 @@ export default function QRStudioPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-100 dark:divide-white/5">
-                                    {filteredQRs.map((qr) => (
-                                        <tr key={qr.id} className="hover:bg-gray-50 dark:hover:bg-zinc-800/20 transition-colors group">
-                                            {/* QR Details */}
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center border border-gray-200 dark:border-white/5 p-1 shrink-0">
-                                                        {qr.imageBlob ? (
-                                                            <img
-                                                                src={qr.imageBlob instanceof Blob ? URL.createObjectURL(qr.imageBlob) : qr.imageBlob as string}
-                                                                alt={qr.name}
-                                                                className="w-full h-full object-contain"
-                                                            />
-                                                        ) : (
-                                                            <QrCode className="w-5 h-5" style={{ color: qr.color }} />
+                                    <AnimatePresence mode="wait">
+                                        {paginatedQRs.map((qr, index) => (
+                                            <motion.tr
+                                                key={qr.id}
+                                                initial={{ opacity: 0, x: -20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                transition={{
+                                                    duration: 0.3,
+                                                    delay: index * 0.05,
+                                                    ease: [0.4, 0, 0.2, 1]
+                                                }}
+                                                className="hover:bg-gray-50 dark:hover:bg-zinc-800/20 transition-colors group"
+                                            >
+                                                {/* QR Details */}
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center border border-gray-200 dark:border-white/5 p-1 shrink-0">
+                                                            {qr.imageBlob ? (
+                                                                <img
+                                                                    src={qr.imageBlob instanceof Blob ? URL.createObjectURL(qr.imageBlob) : qr.imageBlob as string}
+                                                                    alt={qr.name}
+                                                                    className="w-full h-full object-contain"
+                                                                />
+                                                            ) : (
+                                                                <QrCode className="w-5 h-5" style={{ color: qr.color }} />
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-gray-900 dark:text-white text-sm">{qr.name}</p>
+                                                            <div className="flex items-center gap-2 mt-0.5">
+                                                                {qr.isDynamic && (
+                                                                    <span className="text-[9px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Dynamic</span>
+                                                                )}
+                                                                <span className="text-[10px] text-gray-400 font-mono">#{qr.id}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                {/* Destination */}
+                                                <td className="px-6 py-4">
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 max-w-[200px]">
+                                                            <span className="font-bold text-gray-400 text-[10px] uppercase w-10 shrink-0">Target</span>
+                                                            <a href={qr.url} target="_blank" rel="noreferrer" className="truncate hover:text-blue-500 underline decoration-dotted decoration-gray-300 dark:decoration-gray-600">
+                                                                {qr.url}
+                                                            </a>
+                                                        </div>
+                                                        {qr.isDynamic && qr.shortUrl && (
+                                                            <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 max-w-[200px]">
+                                                                <span className="font-bold text-green-500/70 text-[10px] uppercase w-10 shrink-0">Short</span>
+                                                                <span className="truncate font-mono bg-green-50 dark:bg-green-500/10 px-1 rounded flex-1">{qr.shortUrl}</span>
+                                                                <button
+                                                                    onClick={() => window.open(qr.shortUrl, '_blank')}
+                                                                    className="p-1 hover:bg-green-100 dark:hover:bg-green-900/30 rounded text-green-600 transition-colors"
+                                                                    title="Test Redirect"
+                                                                >
+                                                                    <Share2 className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
                                                         )}
                                                     </div>
-                                                    <div>
-                                                        <p className="font-bold text-gray-900 dark:text-white text-sm">{qr.name}</p>
-                                                        <div className="flex items-center gap-2 mt-0.5">
-                                                            {qr.isDynamic && (
-                                                                <span className="text-[9px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-1.5 py-0.5 rounded font-bold uppercase">Dynamic</span>
-                                                            )}
-                                                            <span className="text-[10px] text-gray-400 font-mono">#{qr.id}</span>
-                                                        </div>
+                                                </td>
+
+                                                {/* Analytics */}
+                                                <td className="px-6 py-4 text-center">
+                                                    <div className="flex flex-col items-center">
+                                                        <span className="text-sm font-bold text-gray-900 dark:text-white">{qr.scans}</span>
+                                                        <span className="text-[10px] text-gray-400">Total Scans</span>
                                                     </div>
-                                                </div>
-                                            </td>
+                                                </td>
 
-                                            {/* Destination */}
-                                            <td className="px-6 py-4">
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 max-w-[200px]">
-                                                        <span className="font-bold text-gray-400 text-[10px] uppercase w-10 shrink-0">Target</span>
-                                                        <a href={qr.url} target="_blank" rel="noreferrer" className="truncate hover:text-blue-500 underline decoration-dotted decoration-gray-300 dark:decoration-gray-600">
-                                                            {qr.url}
-                                                        </a>
+                                                {/* Status */}
+                                                <td className="px-6 py-4 text-center">
+                                                    <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold border border-green-200 dark:border-green-900/50">
+                                                        Active
+                                                    </span>
+                                                </td>
+
+                                                {/* Actions */}
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex justify-end gap-1">
+                                                        <button onClick={() => setDownloadingQR(qr)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-blue-500 transition-colors" title="Download">
+                                                            <Download className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => handleShare(qr)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-purple-500 transition-colors" title="Share">
+                                                            <Share2 className="w-4 h-4" />
+                                                        </button>
+                                                        {qr.isDynamic ? (
+                                                            <button onClick={() => setEditingQR(qr)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="Edit Target">
+                                                                <Settings className="w-4 h-4" />
+                                                            </button>
+                                                        ) : (
+                                                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-blue-500 transition-colors" title="Analytics">
+                                                                <BarChart3 className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                        <button onClick={() => setVisualizingQR(qr)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" title="Visualize">
+                                                            <Eye className="w-4 h-4" />
+                                                        </button>
+                                                        <button onClick={() => setDeletingQR(qr)} className="p-2 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Delete">
+                                                            <Trash2 className="w-4 h-4" />
+                                                        </button>
                                                     </div>
-                                                    {qr.isDynamic && qr.shortUrl && (
-                                                        <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400 max-w-[200px]">
-                                                            <span className="font-bold text-green-500/70 text-[10px] uppercase w-10 shrink-0">Short</span>
-                                                            <span className="truncate font-mono bg-green-50 dark:bg-green-500/10 px-1 rounded">{qr.shortUrl}</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </td>
-
-                                            {/* Analytics */}
-                                            <td className="px-6 py-4 text-center">
-                                                <div className="flex flex-col items-center">
-                                                    <span className="text-sm font-bold text-gray-900 dark:text-white">{qr.scans}</span>
-                                                    <span className="text-[10px] text-gray-400">Total Scans</span>
-                                                </div>
-                                            </td>
-
-                                            {/* Status */}
-                                            <td className="px-6 py-4 text-center">
-                                                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold border border-green-200 dark:border-green-900/50">
-                                                    Active
-                                                </span>
-                                            </td>
-
-                                            {/* Actions */}
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-1">
-                                                    <button onClick={() => setDownloadingQR(qr)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-blue-500 transition-colors" title="Download">
-                                                        <Download className="w-4 h-4" />
-                                                    </button>
-                                                    <button onClick={() => handleShare(qr)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-purple-500 transition-colors" title="Share">
-                                                        <Share2 className="w-4 h-4" />
-                                                    </button>
-                                                    {qr.isDynamic ? (
-                                                        <button onClick={() => setEditingQR(qr)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="Edit Target">
-                                                            <Settings className="w-4 h-4" />
-                                                        </button>
-                                                    ) : (
-                                                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-blue-500 transition-colors" title="Analytics">
-                                                            <BarChart3 className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                    <button onClick={() => setVisualizingQR(qr)} className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" title="Visualize">
-                                                        <Eye className="w-4 h-4" />
-                                                    </button>
-                                                    <button onClick={() => handleDeleteQR(qr.id)} className="p-2 hover:bg-red-50 dark:hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Delete">
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-
-                                    {filteredQRs.length === 0 && (
+                                                </td>
+                                            </motion.tr>
+                                        ))}
+                                    </AnimatePresence>
+                                    {paginatedQRs.length === 0 && filteredQRs.length === 0 && (
                                         <tr>
                                             <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                                 <div className="flex flex-col items-center gap-2">
@@ -395,6 +519,54 @@ export default function QRStudioPage() {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 dark:border-white/5">
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                    Showing <span className="font-bold text-gray-900 dark:text-white">{startIndex + 1}</span> to <span className="font-bold text-gray-900 dark:text-white">{Math.min(endIndex, filteredQRs.length)}</span> of <span className="font-bold text-gray-900 dark:text-white">{filteredQRs.length}</span> QR codes
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                        disabled={currentPage === 1}
+                                        className="px-3 py-2 text-sm font-bold rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Previous
+                                    </button>
+
+                                    <div className="flex items-center gap-1">
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                            <motion.button
+                                                key={page}
+                                                onClick={() => setCurrentPage(page)}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                                animate={{
+                                                    scale: currentPage === page ? 1 : 1,
+                                                }}
+                                                transition={{ duration: 0.2 }}
+                                                className={`w-10 h-10 rounded-lg text-sm font-bold transition-all ${currentPage === page
+                                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
+                                                    : 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700'
+                                                    }`}
+                                            >
+                                                {page}
+                                            </motion.button>
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                        disabled={currentPage === totalPages}
+                                        className="px-3 py-2 text-sm font-bold rounded-lg bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </section>
             )}
@@ -531,6 +703,211 @@ export default function QRStudioPage() {
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <AnimatePresence>
+                {deletingQR && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={() => setDeletingQR(null)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            transition={{ type: "spring", duration: 0.3 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 dark:border-white/10"
+                        >
+                            {/* Header */}
+                            <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-6 text-white">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                        <Trash2 className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold">Move to Trash?</h3>
+                                        <p className="text-orange-100 text-sm">You can restore it later</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6">
+                                <div className="bg-gray-50 dark:bg-zinc-800/50 rounded-xl p-4 mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                                            <QrCode className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-gray-900 dark:text-white truncate">{deletingQR.name}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{deletingQR.url}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2 mb-6">
+                                    <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1.5 shrink-0"></div>
+                                        <p>The QR code will be moved to trash</p>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1.5 shrink-0"></div>
+                                        <p>You can restore it anytime from the trash</p>
+                                    </div>
+                                    <div className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-1.5 shrink-0"></div>
+                                        <p>The QR code will stop working until restored</p>
+                                    </div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex gap-3">
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => setDeletingQR(null)}
+                                        className="flex-1 px-4 py-3 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
+                                    >
+                                        Cancel
+                                    </motion.button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => handleDeleteQR(deletingQR.id)}
+                                        className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/20 transition-all"
+                                    >
+                                        Move to Trash
+                                    </motion.button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Trash View Modal */}
+            <AnimatePresence>
+                {showTrash && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                        onClick={() => setShowTrash(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            transition={{ type: "spring", duration: 0.3 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl max-w-5xl w-full max-h-[85vh] overflow-hidden border border-gray-200 dark:border-white/10"
+                        >
+                            {/* Header */}
+                            <div className="relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950"></div>
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.1),transparent_50%)]"></div>
+                                <div className="relative px-8 py-6 border-b border-white/10">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+                                                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center border border-white/10 shadow-lg">
+                                                    <Trash2 className="w-7 h-7 text-blue-400" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h3 className="text-2xl font-bold text-white">Trash</h3>
+                                                <p className="text-slate-400 text-sm mt-0.5">
+                                                    {deletedQRs.length} {deletedQRs.length === 1 ? 'item' : 'items'} • Can be restored anytime
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => setShowTrash(false)}
+                                            className="w-11 h-11 rounded-xl hover:bg-white/10 flex items-center justify-center transition-all group border border-white/5"
+                                        >
+                                            <span className="text-2xl text-slate-400 group-hover:text-white transition-colors">×</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-8 overflow-y-auto max-h-[calc(85vh-140px)] bg-gray-50/50 dark:bg-zinc-950/50">
+                                {deletedQRs.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                                        <div className="relative mb-6">
+                                            <div className="absolute inset-0 bg-blue-500/10 blur-2xl rounded-full"></div>
+                                            <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center border border-gray-200 dark:border-white/10 shadow-lg">
+                                                <Trash2 className="w-10 h-10 text-gray-400 dark:text-gray-600" />
+                                            </div>
+                                        </div>
+                                        <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Trash is empty</h4>
+                                        <p className="text-gray-500 dark:text-gray-400">Deleted QR codes will appear here and can be restored anytime</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {deletedQRs.map((qr, index) => (
+                                            <motion.div
+                                                key={qr.id}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: index * 0.05 }}
+                                                className="group bg-white dark:bg-zinc-900 rounded-2xl p-5 border border-gray-200 dark:border-white/10 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all hover:shadow-lg hover:shadow-blue-500/5"
+                                            >
+                                                <div className="flex items-center justify-between gap-6">
+                                                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                        <div className="relative shrink-0">
+                                                            <div className="absolute inset-0 bg-blue-500/20 blur-lg rounded-xl group-hover:bg-blue-500/30 transition-all"></div>
+                                                            <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center border border-blue-200 dark:border-blue-500/20">
+                                                                <QrCode className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-bold text-gray-900 dark:text-white truncate text-lg">{qr.name}</p>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">{qr.url}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 shrink-0">
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => {
+                                                                handleRestore(qr.id);
+                                                                setShowTrash(false);
+                                                            }}
+                                                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-green-500 to-green-600 text-white font-bold hover:from-green-600 hover:to-green-700 shadow-lg shadow-green-500/20 transition-all text-sm"
+                                                        >
+                                                            Restore
+                                                        </motion.button>
+                                                        <motion.button
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => {
+                                                                if (confirm('Permanently delete this QR code? This cannot be undone.')) {
+                                                                    handlePermanentDelete(qr.id);
+                                                                }
+                                                            }}
+                                                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white font-bold hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/20 transition-all text-sm"
+                                                        >
+                                                            Delete Forever
+                                                        </motion.button>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

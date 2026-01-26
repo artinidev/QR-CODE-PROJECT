@@ -24,10 +24,10 @@ interface QRPreset {
     }
 }
 
-export default function AdvancedQRGenerator({ initialUrl = 'https://example.com', onSave }: AdvancedQRGeneratorProps) {
+export default function AdvancedQRGenerator({ initialUrl = '', onSave }: AdvancedQRGeneratorProps) {
     // Mode State
     const [mode, setMode] = useState<'single' | 'bulk'>('single');
-    const [bulkInput, setBulkInput] = useState('https://site1.com, Site One\nhttps://site2.com, Site Two');
+    const [bulkInput, setBulkInput] = useState('');
 
     // QR Configuration State
     const [url, setUrl] = useState(initialUrl);
@@ -40,7 +40,9 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
     useEffect(() => {
         if (isDynamic) {
             const shortId = Math.random().toString(36).substring(2, 8);
-            setVirtualShortUrl(`https://pdi.link/${shortId}`);
+            // Use current origin if available, else placeholder
+            const origin = typeof window !== 'undefined' ? window.location.origin : 'https://pdi.link';
+            setVirtualShortUrl(`${origin}/q/${shortId}`);
         } else {
             setVirtualShortUrl('');
         }
@@ -93,7 +95,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                 ref.current.innerHTML = '';
                 qrCode.current.append(ref.current);
             }
-            // Initial update - USE REAL URL ALWAYS FOR DEMO
+            // Initial update - Show destination in preview (we don't have real short URL until save)
             const activeUrl = isDynamic ? targetUrl : url;
             qrCode.current.update({
                 data: activeUrl || 'https://example.com',
@@ -107,7 +109,7 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
 
     useEffect(() => {
         if (!qrCode.current) return;
-        // USE REAL URL ALWAYS FOR DEMO
+        // Show destination in preview (we don't have real short URL until save)
         const activeUrl = isDynamic ? targetUrl : url;
         qrCode.current.update({
             data: activeUrl || 'https://example.com',
@@ -163,8 +165,8 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                     });
                 }
             }
-            // Reset QR to main url
-            const activeUrl = isDynamic ? targetUrl : url;
+            // Reset QR to main url - use short URL for dynamic
+            const activeUrl = isDynamic ? (virtualShortUrl || targetUrl) : url;
             if (qrCode.current) qrCode.current.update({ data: activeUrl || 'https://example.com' });
         } else {
             // Single Save Logic
@@ -259,11 +261,21 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                                         placeholder="https://example.com"
                                     />
                                     {isDynamic && (
-                                        <div className="flex items-center gap-1.5 bg-green-50 dark:bg-green-500/10 px-2 py-1 rounded border border-green-100 dark:border-green-500/20">
-                                            <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
-                                            <p className="text-[9px] text-green-700 dark:text-green-400 font-medium truncate">
-                                                via: {virtualShortUrl}
-                                            </p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 flex items-center gap-1.5 bg-green-50 dark:bg-green-500/10 px-2 py-1 rounded border border-green-100 dark:border-green-500/20">
+                                                <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                                                <p className="text-[9px] text-green-700 dark:text-green-400 font-medium truncate">
+                                                    via: {virtualShortUrl}
+                                                </p>
+                                            </div>
+                                            {/* Test Button - Only active if we have a real short URL, but for UI demo we just show it */}
+                                            <button
+                                                onClick={() => window.open(virtualShortUrl, '_blank')}
+                                                className="px-2 py-1 bg-gray-100 dark:bg-zinc-800 text-[9px] font-bold rounded border border-gray-200 dark:border-white/10 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-600 dark:text-gray-300 transition-colors"
+                                                title="Test Redirect"
+                                            >
+                                                Test
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -296,6 +308,13 @@ export default function AdvancedQRGenerator({ initialUrl = 'https://example.com'
                 {/* Column 2: The Stage / Preview (5/12) */}
                 <div className="lg:col-span-5 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-zinc-950/50 rounded-2xl border border-gray-100/50 dark:border-white/5 p-6 relative group">
                     <div ref={ref} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 dark:border-none transform transition-transform group-hover:scale-105 duration-300" />
+                    {isDynamic && (
+                        <div className="mt-4 max-w-xs text-center">
+                            <p className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg border border-amber-200 dark:border-amber-900/40">
+                                <strong>Preview Only:</strong> This shows your destination URL. After saving, the actual QR will encode a short URL that redirects here.
+                            </p>
+                        </div>
+                    )}
                     <p className="absolute bottom-2 text-[9px] font-bold text-gray-300 dark:text-gray-500 uppercase tracking-widest pointer-events-none">Live Preview</p>
                 </div>
 

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; // Use Inter for modern look
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ['300', '400', '500', '600', '700', '800', '900']
+});
 
 export const metadata: Metadata = {
   title: "PDI Platform",
@@ -18,8 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       {/* suppressHydrationWarning is needed for next-themes/theme-provider handling of classes */}
-      <body className={`${inter.className} antialiased min-h-screen bg-background text-foreground`}>
+      <body className={`${poppins.className} antialiased min-h-screen bg-background text-foreground`}>
         <ThemeProvider
+          attribute="class"
           defaultTheme="system"
           storageKey="pdi-theme"
         >
