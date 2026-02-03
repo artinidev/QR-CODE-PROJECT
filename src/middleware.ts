@@ -7,7 +7,7 @@ export function middleware(request: NextRequest) {
     // Protect Dashboard Routes
     if (request.nextUrl.pathname.startsWith('/dashboard')) {
         if (!token) {
-            return NextResponse.redirect(new URL('/auth/login', request.url));
+            return NextResponse.redirect(new URL('/', request.url));
         }
     }
 

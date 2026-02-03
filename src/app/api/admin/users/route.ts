@@ -118,14 +118,14 @@ export async function POST(request: NextRequest) {
                     },
                 });
 
-                let emailSubject = 'Welcome to PDI Platform';
+                let emailSubject = 'Welcome to SCANEX';
                 let emailHtml = '';
 
                 if (password) {
                     // Scenario: Pre-set password
                     emailHtml = `
-                        <h2>Welcome to PDI Platform!</h2>
-                        <p>You have been invited to join the PDI Platform.</p>
+                        <h2>Welcome to SCANEX!</h2>
+                        <p>You have been invited to join SCANEX.</p>
                         <p><strong>Available Features:</strong> ${Object.keys(newUser.features).filter(k => newUser.features[k]).join(', ') || 'Standard Access'}</p>
                         <hr />
                         <h3>Your Login Credentials:</h3>
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
                     const inviteLink = `${NEXT_PUBLIC_URL}/invite/${invitationToken}`;
                     emailHtml = `
                         <h2>You're Invited!</h2>
-                        <p>You have been invited to join the PDI Platform.</p>
+                        <p>You have been invited to join SCANEX.</p>
                         <p>Please click the link below to verify your email and set your password.</p>
                         <p><a href="${inviteLink}" style="padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">Accept Invitation</a></p>
                         <p>Or copy this link: ${inviteLink}</p>
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
                 }
 
                 const info = await transporter.sendMail({
-                    from: `"PDI Platform" <${SMTP_USER}>`,
+                    from: `"SCANEX" <${SMTP_USER}>`,
                     to: email,
                     subject: emailSubject,
                     html: emailHtml,

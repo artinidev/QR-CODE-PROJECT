@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, User, Settings, LogOut, BarChart2, QrCode, Users, Palette, Layout, Smartphone } from 'lucide-react';
+import { Home, User, Settings, LogOut, BarChart2, QrCode, Users, Palette, Layout, Smartphone, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 

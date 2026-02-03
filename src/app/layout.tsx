@@ -9,7 +9,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "PDI Platform",
+  title: "SCANEX",
   description: "Your Professional Digital Identity",
 };
 

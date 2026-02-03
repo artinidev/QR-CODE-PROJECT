@@ -43,12 +43,16 @@ export async function POST(req: NextRequest) {
             targetUrl: targetUrl || 'https://example.com', // The real destination
             name: name || 'Untitled QR',
             color: color || '#000000',
-            isDynamic: !!isDynamic, // If false, the QR encodes targetUrl directly? 
-            // ACTUALLY: The prompt implies *creating* the DB record. 
-            // Even for "static" QRs we might want to track scans?
-            // If strictly static, we don't *need* a DB record for redirection, 
-            // but preserving it lets us edit it later or track it.
-            // Let's assume ALL QRs created via this API get a record.
+            isDynamic: !!isDynamic,
+
+            // Campaign Fields
+            type: body.type || 'standard', // 'standard' | 'marketing-campaign'
+            objective: body.objective || null,
+            startDate: body.startDate ? new Date(body.startDate) : null,
+            endDate: body.endDate ? new Date(body.endDate) : null,
+            fallbackUrl: body.fallbackUrl || null,
+            redirectBehavior: body.redirectBehavior || 'always_primary', // 'always_primary', 'fallback_expired'
+
             createdAt: new Date(),
             scans: 0
         };
@@ -194,6 +198,12 @@ export async function GET(req: NextRequest) {
             query.deletedAt = { $exists: false };
         }
 
+        // Filter by type
+        const type = searchParams.get('type');
+        if (type) {
+            query.type = type;
+        }
+
         const qrCodes = await qrCodesCollection.find(query).sort({ createdAt: -1 }).toArray();
 
         // Determine Base URL helper
@@ -224,6 +234,7 @@ export async function GET(req: NextRequest) {
                 name: qr.name,
                 color: qr.color,
                 scans: qr.scans || 0,
+                lastScan: qr.lastScan || null,
                 createdAt: qr.createdAt
             }))
         });

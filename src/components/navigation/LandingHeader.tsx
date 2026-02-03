@@ -46,10 +46,12 @@ export function LandingHeader() {
         <>
             <header className="fixed top-0 left-0 right-0 z-[50] px-8 py-4 flex items-center justify-between backdrop-blur-md bg-white/70 dark:bg-black/40 border-b border-indigo-500/5 transition-all">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-                        <Zap className="w-6 h-6 fill-current" />
-                    </div>
-                    <span className="text-xl font-bold tracking-tight">PDI Platform</span>
+                    <img
+                        src="/scanex-icon.png"
+                        alt="SCANEX"
+                        className="w-10 h-10"
+                    />
+                    <span className="text-xl font-bold tracking-tight">SCANEX</span>
                 </div>
 
                 {/* --- NAVIGATION CENTER --- */}

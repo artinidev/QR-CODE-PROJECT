@@ -138,11 +138,20 @@ export default function AdvancedQRGenerator({ initialUrl = '', onSave }: Advance
         }
     };
 
-    const download = (extension: 'png' | 'jpeg' | 'svg') => {
+    const download = async (extension: 'png' | 'jpeg' | 'svg') => {
         if (qrCode.current) {
-            qrCode.current.download({
-                extension: extension
-            });
+            const cleanName = (name || 'qr-code').trim().replace(/[\/\\:*?"<>|]/g, '-');
+            const blob = await qrCode.current.getRawData(extension);
+            if (blob) {
+                const url = URL.createObjectURL(blob as Blob);
+                const anchor = document.createElement('a');
+                anchor.href = url;
+                anchor.download = `${cleanName}.${extension}`;
+                document.body.appendChild(anchor);
+                anchor.click();
+                document.body.removeChild(anchor);
+                URL.revokeObjectURL(url);
+            }
         }
     };
 

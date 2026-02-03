@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 
     return {
-        title: `${profile.fullName} - PDI Platform`,
+        title: `${profile.fullName} - SCANEX`,
         description: `${profile.jobTitle} at ${profile.company}`,
     }
 }

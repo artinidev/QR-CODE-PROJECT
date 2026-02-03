@@ -2,7 +2,7 @@ import React from 'react';
 import NewsletterBuilder from '@/components/builder/NewsletterBuilder';
 
 export const metadata = {
-    title: 'Newsletter Builder - PDI Platform',
+    title: 'Newsletter Builder - SCANEX',
 };
 
 export default function BuilderPage() {
