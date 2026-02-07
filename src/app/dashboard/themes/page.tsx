@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Palette, Check, Layout, Smartphone, Laptop, Sparkles, Droplets, Grid, Waves as WaveIcon, Monitor, Save, Share2, Maximize2 } from 'lucide-react';
-import ProfileView, { ThemeConfig } from '@/components/profile/ProfileView';
-import { Profile } from '@/types/models';
+
+import { Palette, Check, Layout, Smartphone, Laptop, Sparkles, Droplets, Grid, Waves as WaveIcon, Monitor, Save, Share2, Maximize2, Briefcase, Plus, Trash2 } from 'lucide-react';
+import ProfileView from '@/components/profile/ProfileView';
+import { ThemeConfig, BrandKit, Profile } from '@/types/models';
 
 // --- Dummy Data for Preview ---
 const DUMMY_PROFILE: Profile = {
@@ -82,19 +83,92 @@ const BACKGROUND_OPTIONS = [
 ];
 
 export default function ThemeStudioPage() {
+
     const [currentConfig, setCurrentConfig] = useState<ThemeConfig>(THEME_PRESETS[0]);
     const [previewMode, setPreviewMode] = useState<'mobile' | 'desktop'>('mobile');
-    const [selectedPresetId, setSelectedPresetId] = useState<string>(THEME_PRESETS[0].id);
+    const [selectedPresetId, setSelectedPresetId] = useState<string>(THEME_PRESETS[0].id || 'modern-blue');
+
+    // Brand Kit State
+    const [brandKits, setBrandKits] = useState<BrandKit[]>([]);
+    const [kitName, setKitName] = useState('');
+    const [showNameModal, setShowNameModal] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    React.useEffect(() => {
+        fetch('/api/brand-kits').then(res => res.json()).then(data => {
+            if (Array.isArray(data)) setBrandKits(data);
+        });
+    }, []);
+
+    const handleSaveKit = async () => {
+        if (!kitName) return;
+        setLoading(true);
+        try {
+            const res = await fetch('/api/brand-kits', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: kitName, config: currentConfig, isDefault: false })
+            });
+            if (res.ok) {
+                const newKit = await res.json();
+                setBrandKits([newKit, ...brandKits]);
+                setShowNameModal(false);
+                setKitName('');
+                setSelectedPresetId(newKit._id);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateKit = async (kitId: string) => {
+        setLoading(true);
+        try {
+            await fetch(`/api/brand-kits/${kitId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ config: currentConfig })
+            });
+            // Update local state
+            setBrandKits(prev => prev.map(k => k._id === kitId ? { ...k, config: currentConfig } : k));
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDeleteKit = async (e: React.MouseEvent, kitId: string) => {
+        e.stopPropagation();
+        if (!confirm('Delete this Brand Kit?')) return;
+        try {
+            await fetch(`/api/brand-kits/${kitId}`, { method: 'DELETE' });
+            setBrandKits(prev => prev.filter(k => k._id !== kitId));
+            if (selectedPresetId === kitId) {
+                setSelectedPresetId(THEME_PRESETS[0].id!);
+                setCurrentConfig(THEME_PRESETS[0]);
+            }
+        } catch (e) { console.error(e); }
+    };
 
     const handlePresetSelect = (preset: ThemeConfig) => {
-        setSelectedPresetId(preset.id);
+        if (preset.id) setSelectedPresetId(preset.id);
         setCurrentConfig({ ...preset });
     };
 
     const updateConfig = (key: keyof ThemeConfig, value: any) => {
         setCurrentConfig(prev => ({ ...prev, [key]: value }));
-        if (key !== 'id') {
-            setSelectedPresetId('custom');
+        // Don't deselect completely, just indicate modification if needed
+        // But for now, keep selectedPresetId pointing to the kit being edited if applicable
+        // Or specific logic: if editing a Preset, switch to Custom. If editing a Kit, keep Kit ID.
+        if (selectedPresetId && !brandKits.find(k => k._id === selectedPresetId)) {
+            // If currently selected is a PRESET (not a kit ID), then changing config switches to 'custom'
+            // Unless we want to support "Unsaved changes" state.
+            // For simplicity: If it is a PRESET, switch to 'custom'. If it is a KIT, keep it (to allow Update).
+            const isPreset = THEME_PRESETS.some(p => p.id === selectedPresetId);
+            if (isPreset) setSelectedPresetId('custom');
         }
     };
 
@@ -104,18 +178,56 @@ export default function ThemeStudioPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 flex-shrink-0">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Theme Studio</h1>
-                    <p className="text-gray-500 dark:text-gray-400">Design a premium profile that stands out.</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Brand Kit Studio</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Manage your company's visual identity and profile templates.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300 rounded-full font-bold shadow-sm hover:bg-gray-50 dark:hover:bg-zinc-800 transition-all text-sm">
                         <Share2 className="w-4 h-4" />
                         Share Layout
                     </button>
-                    <button className="flex items-center gap-2 px-5 py-2 bg-[#3B82F6] text-white rounded-full font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 hover:scale-105 transition-all">
+                    <button
+                        onClick={() => {
+                            if (brandKits.find(k => k._id === selectedPresetId)) {
+                                handleUpdateKit(selectedPresetId);
+                            } else {
+                                setShowNameModal(true);
+                            }
+                        }}
+                        className="flex items-center gap-2 px-5 py-2 bg-[#3B82F6] text-white rounded-full font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-600 hover:scale-105 transition-all"
+                    >
                         <Save className="w-4 h-4" />
                         Save Changes
                     </button>
+
+                    {/* Name Modal */}
+                    {showNameModal && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                            <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl w-full max-w-sm shadow-2xl">
+                                <h3 className="text-lg font-bold mb-4">Name your Brand Kit</h3>
+                                <input
+                                    autoFocus
+                                    className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 mb-4 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="e.g. Sales Team Kit"
+                                    value={kitName}
+                                    onChange={(e) => setKitName(e.target.value)}
+                                />
+                                <div className="flex gap-2 justify-end">
+                                    <button
+                                        onClick={() => setShowNameModal(false)}
+                                        className="px-4 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-lg"
+                                    >Cancel</button>
+                                    <button
+                                        onClick={handleSaveKit}
+                                        disabled={!kitName || loading}
+                                        className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                    >
+                                        {loading ? 'Saving...' : 'Create Kit'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -124,6 +236,63 @@ export default function ThemeStudioPage() {
 
                 {/* Left Column: Controls (Scrollable) */}
                 <div className="lg:col-span-7 xl:col-span-8 overflow-y-auto pr-2 custom-scrollbar pb-20 space-y-8">
+
+                    {/* 0. Brand Kits */}
+                    <section>
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                                    <Briefcase className="w-4 h-4" />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">My Brand Kits</h3>
+                            </div>
+                            <button
+                                onClick={() => { setSelectedPresetId('custom'); setCurrentConfig(THEME_PRESETS[0]); }}
+                                className="text-xs font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1"
+                            >
+                                <Plus className="w-3 h-3" /> New
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 mb-6">
+                            {brandKits.map((kit) => {
+                                const isSelected = selectedPresetId === kit._id?.toString();
+                                return (
+                                    <div
+                                        key={kit._id?.toString()}
+                                        onClick={() => { setSelectedPresetId(kit._id!.toString()); setCurrentConfig(kit.config); }}
+                                        className={`p-4 rounded-xl border cursor-pointer transition-all relative group ${isSelected
+                                            ? 'bg-indigo-50 dark:bg-indigo-900/10 border-indigo-500 ring-1 ring-indigo-500/50'
+                                            : 'bg-white dark:bg-zinc-900 border-gray-100 dark:border-white/5 hover:border-gray-200'}`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-bold text-sm text-gray-900 dark:text-white">{kit.name}</span>
+                                            {isSelected && kit._id && (
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={(e) => handleDeleteKit(e, kit._id!.toString())}
+                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); handleUpdateKit(kit._id!.toString()); }}
+                                                        className="p-1.5 text-indigo-600 hover:bg-indigo-100 rounded-lg font-bold text-xs"
+                                                    >
+                                                        {loading ? '...' : 'Update'}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            {brandKits.length === 0 && (
+                                <div className="text-center p-6 border border-dashed border-gray-200 dark:border-white/10 rounded-2xl text-gray-400 text-sm">
+                                    No brand kits saved yet.
+                                </div>
+                            )}
+                        </div>
+                    </section>
 
                     {/* 1. Theme Presets */}
                     <section>
@@ -197,7 +366,41 @@ export default function ThemeStudioPage() {
 
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
-                        {/* 2. Visual Style */}
+
+                        {/* 2. Company Identity */}
+                        <section className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-gray-100 dark:border-white/5 shadow-sm space-y-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 flex items-center justify-center">
+                                    <Briefcase className="w-4 h-4" />
+                                </div>
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">Company Identity</h3>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Logo URL</label>
+                                    <input
+                                        type="url"
+                                        placeholder="https://..."
+                                        value={currentConfig.logoUrl || ''}
+                                        onChange={(e) => updateConfig('logoUrl', e.target.value)}
+                                        className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                    />
+                                    <p className="text-[10px] text-gray-400 mt-1">Displayed at top of profile.</p>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">Cover Image URL</label>
+                                    <input
+                                        type="url"
+                                        placeholder="https://..."
+                                        value={currentConfig.coverUrl || ''}
+                                        onChange={(e) => updateConfig('coverUrl', e.target.value)}
+                                        className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-500/50"
+                                    />
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 3. Visual Style */}
                         <section className="bg-white dark:bg-zinc-900 rounded-3xl p-6 border border-gray-100 dark:border-white/5 shadow-sm space-y-6">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center">

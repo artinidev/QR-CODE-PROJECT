@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Profile, Group } from '@/types/models';
+import { Profile, Group, BrandKit } from '@/types/models';
 import { Search, Filter, Plus, Trash2, Edit2, RotateCcw, MoreVertical, Calendar, Folder, FolderPlus, Check, X, Share2, QrCode, ChevronLeft, ChevronRight, User } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import QRDownload from './QRDownload'; // Ensure this component handles the QR display
+import ProfileListAnalytics from './ProfileListAnalytics';
 
 interface ProfileListProps {
     onSelectProfile: (profileId: string) => void;
@@ -15,11 +16,23 @@ interface ProfileListProps {
 
 export default function ProfileList({ onSelectProfile, onEditProfile, onCreateProfile, selectedProfileId }: ProfileListProps) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // UI State
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const [groups, setGroups] = useState<Group[]>([]);
+    const [brandKits, setBrandKits] = useState<BrandKit[]>([]);
+    const [selectedBrandKitId, setSelectedBrandKitId] = useState<string>('');
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'active' | 'deleted'>('active');
+    const [filter, setFilter] = useState<'active' | 'deleted' | 'analytics'>('active');
     const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab === 'analytics') {
+            setFilter('analytics');
+        }
+    }, [searchParams]);
 
     // UI State
     const [activeMenu, setActiveMenu] = useState<string | null>(null); // Profile ID for open menu
@@ -41,6 +54,7 @@ export default function ProfileList({ onSelectProfile, onEditProfile, onCreatePr
     useEffect(() => {
         fetchProfiles();
         fetchGroups();
+        fetchBrandKits();
     }, [filter, search]);
 
     // Close menu on click outside
@@ -85,6 +99,18 @@ export default function ProfileList({ onSelectProfile, onEditProfile, onCreatePr
             if (res.ok) {
                 const data = await res.json();
                 setGroups(data);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const fetchBrandKits = async () => {
+        try {
+            const res = await fetch('/api/brand-kits');
+            if (res.ok) {
+                const data = await res.json();
+                setBrandKits(data);
             }
         } catch (error) {
             console.error(error);
@@ -144,7 +170,11 @@ export default function ProfileList({ onSelectProfile, onEditProfile, onCreatePr
             const res = await fetch('/api/groups', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newGroupName, color: newGroupColor })
+                body: JSON.stringify({
+                    name: newGroupName,
+                    color: newGroupColor,
+                    defaultBrandKitId: selectedBrandKitId || undefined
+                })
             });
 
             if (res.ok) {
@@ -158,6 +188,7 @@ export default function ProfileList({ onSelectProfile, onEditProfile, onCreatePr
 
                 setNewGroupName('');
                 setNewGroupColor('blue');
+                setSelectedBrandKitId('');
                 setShowGroupModal(false);
             }
         } catch (error) {
@@ -167,10 +198,17 @@ export default function ProfileList({ onSelectProfile, onEditProfile, onCreatePr
 
     const handleMoveToGroup = async (profileId: string, groupId: string | null) => {
         try {
+            const group = groups.find(g => g._id?.toString() === groupId);
+            const payload: any = { groupId: groupId };
+
+            if (group?.defaultBrandKitId) {
+                payload.brandKitId = group.defaultBrandKitId;
+            }
+
             const res = await fetch(`/api/profiles/${profileId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ groupId: groupId })
+                body: JSON.stringify(payload)
             });
             if (res.ok) {
                 fetchProfiles();
@@ -279,6 +317,12 @@ export default function ProfileList({ onSelectProfile, onEditProfile, onCreatePr
                                     Active
                                 </button>
                                 <button
+                                    onClick={() => setFilter('analytics')}
+                                    className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filter === 'analytics' ? 'bg-white dark:bg-zinc-900 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                                >
+                                    Analytics
+                                </button>
+                                <button
                                     onClick={() => setFilter('deleted')}
                                     className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${filter === 'deleted' ? 'bg-white dark:bg-zinc-900 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
                                 >
@@ -298,183 +342,192 @@ export default function ProfileList({ onSelectProfile, onEditProfile, onCreatePr
                             </div>
                         </div>
 
-                        {/* Profiles Table */}
-                        <div className="flex-1 overflow-auto custom-scrollbar p-1">
-                            <table className="w-full text-left text-sm border-spacing-y-2 border-separate px-4">
-                                <thead className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 bg-white dark:bg-zinc-900 z-10">
-                                    <tr>
-                                        <th className="p-4 w-12 pb-2"></th>
-                                        <th className="p-4 pb-2">Profile Name</th>
-                                        <th className="p-4 pb-2">Group</th>
-                                        <th className="p-4 pb-2">Role / Title</th>
-                                        <th className="p-4 pb-2">Created</th>
-                                        <th className="p-4 w-12 pb-2"></th>
-                                    </tr>
-                                </thead>
-                                <tbody className="space-y-2">
-                                    {loading ? (
-                                        [1, 2, 3].map((i) => (
-                                            <tr key={i} className="animate-pulse">
-                                                <td className="p-4"><div className="w-4 h-4 bg-muted rounded"></div></td>
-                                                <td className="p-4"><div className="w-32 h-4 bg-muted rounded"></div></td>
-                                                <td className="p-4"><div className="w-20 h-4 bg-muted rounded"></div></td>
-                                                <td className="p-4"><div className="w-24 h-4 bg-muted rounded"></div></td>
-                                                <td className="p-4"><div className="w-20 h-4 bg-muted rounded"></div></td>
-                                                <td className="p-4"></td>
-                                            </tr>
-                                        ))
-                                    ) : filteredProfiles.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={6} className="p-12 text-center text-muted-foreground">
-                                                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-xl bg-muted/10">
-                                                    <User className="w-8 h-8 text-muted-foreground/50 mb-3" />
-                                                    <p>No profiles found.</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        filteredProfiles.map((profile) => (
-                                            <tr
-                                                key={profile._id?.toString()}
-                                                onClick={filter === 'active' ? () => onSelectProfile(profile._id!.toString()) : undefined}
-                                                onDoubleClick={filter === 'active' ? () => onEditProfile(profile._id!.toString()) : undefined}
-                                                className={`group transition-all cursor-pointer rounded-xl relative ${selectedProfileId === profile._id?.toString()
-                                                    ? 'bg-primary/5 shadow-sm ring-1 ring-primary/20 z-10'
-                                                    : 'hover:bg-muted/40'
-                                                    }`}
-                                            >
-                                                <td className="p-4 rounded-l-xl"><input type="checkbox" className="rounded border-gray-300 accent-primary" /></td>
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shadow-sm transition-colors ${selectedProfileId === profile._id?.toString() ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'}`}>
-                                                            {profile.fullName.charAt(0)}
-                                                        </div>
-                                                        <span className={`font-semibold ${selectedProfileId === profile._id?.toString() ? 'text-primary' : ''}`}>
-                                                            {profile.fullName}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    {profile.groupId ? (
-                                                        (() => {
-                                                            const group = groups.find(g => g._id?.toString() === profile.groupId);
-                                                            const colorData = group
-                                                                ? (availableColors.find(c => c.value === group.color) || availableColors[0])
-                                                                : availableColors[0];
-
-                                                            return (
-                                                                <span className={`${colorData.light} ${colorData.text} px-2.5 py-1 rounded-md text-xs font-bold border ${colorData.border} dark:bg-opacity-10`}>
-                                                                    {group?.name || 'Unknown Group'}
-                                                                </span>
-                                                            );
-                                                        })()
-                                                    ) : (
-                                                        <span className="text-muted-foreground text-xs italic">No Group</span>
-                                                    )}
-                                                </td>
-                                                <td className="p-4 text-muted-foreground font-medium">{profile.jobTitle || 'N/A'}</td>
-                                                <td className="p-4 text-muted-foreground">{new Date(profile.createdAt).toLocaleDateString()}</td>
-                                                <td className="p-4 relative rounded-r-xl">
-                                                    {filter === 'active' ? (
-                                                        <>
-                                                            <button
-                                                                onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === profile._id?.toString() ? null : profile._id!.toString()); }}
-                                                                className={`p-2 rounded-lg transition-colors ${activeMenu === profile._id?.toString() ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-white hover:text-foreground hover:shadow-sm'}`}
-                                                            >
-                                                                <MoreVertical className="w-4 h-4" />
-                                                            </button>
-
-                                                            {/* Dropdown Menu */}
-                                                            {activeMenu === profile._id?.toString() && (
-                                                                <div className="absolute right-12 top-2 w-60 bg-card/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl z-50 animate-in fade-in zoom-in-95 overflow-hidden origin-top-right ring-1 ring-black/5">
-                                                                    <div className="p-2 space-y-1">
-                                                                        <button
-                                                                            onClick={(e) => { e.stopPropagation(); onEditProfile(profile._id!.toString()); setActiveMenu(null); }}
-                                                                            className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-xl transition-colors"
-                                                                        >
-                                                                            <Edit2 className="w-4 h-4" /> Edit Profile
-                                                                        </button>
-
-                                                                        <div className="h-px bg-border/50 my-1 mx-2" />
-
-                                                                        {/* Groups Submenu Section */}
-                                                                        <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Move to Group</div>
-
-                                                                        {groups.map(g => (
-                                                                            <button
-                                                                                key={g._id?.toString()}
-                                                                                onClick={(e) => { e.stopPropagation(); handleMoveToGroup(profile._id!.toString(), g._id!.toString()); setActiveMenu(null); }}
-                                                                                className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${profile.groupId === g._id?.toString() ? 'text-primary bg-primary/5 font-semibold' : 'text-foreground hover:bg-accent'}`}
-                                                                            >
-                                                                                <Folder className="w-3.5 h-3.5" />
-                                                                                {g.name}
-                                                                                {profile.groupId === g._id?.toString() && <Check className="w-3 h-3 ml-auto" />}
-                                                                            </button>
-                                                                        ))}
-
-                                                                        <button
-                                                                            onClick={(e) => {
-                                                                                e.stopPropagation();
-                                                                                setProfileToMove(profile._id!.toString());
-                                                                                setNewGroupName(`${profile.company || profile.fullName}'s Team`);
-                                                                                setShowGroupModal(true);
-                                                                                setActiveMenu(null);
-                                                                            }}
-                                                                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
-                                                                        >
-                                                                            <FolderPlus className="w-4 h-4" /> New Group
-                                                                        </button>
-
-                                                                        {profile.groupId && (
-                                                                            <button
-                                                                                onClick={(e) => { e.stopPropagation(); handleMoveToGroup(profile._id!.toString(), null); setActiveMenu(null); }}
-                                                                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors"
-                                                                            >
-                                                                                <X className="w-4 h-4" /> Ungroup
-                                                                            </button>
-                                                                        )}
-
-                                                                        <div className="h-px bg-border/50 my-1 mx-2" />
-
-                                                                        <button
-                                                                            onClick={(e) => { e.stopPropagation(); handleDelete(profile._id!.toString()); setActiveMenu(null); }}
-                                                                            className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors font-medium"
-                                                                        >
-                                                                            <Trash2 className="w-4 h-4" /> Move to Trash
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </>
-                                                    ) : (
-                                                        <button
-                                                            onClick={(e) => { e.stopPropagation(); handleRestore(profile._id!.toString()); }}
-                                                            className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg transition-colors"
-                                                            title="Restore"
-                                                        >
-                                                            <RotateCcw className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        {/* Pagination Footer */}
-                        <div className="p-4 border-t border-border/40 bg-muted/20 flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">Showing {filteredProfiles.length} profiles</span>
-                            <div className="flex gap-2">
-                                <button className="p-2 border border-border rounded-lg hover:bg-white transition-all disabled:opacity-50">
-                                    <ChevronLeft className="w-4 h-4" />
-                                </button>
-                                <button className="p-2 border border-border rounded-lg hover:bg-white transition-all disabled:opacity-50">
-                                    <ChevronRight className="w-4 h-4" />
-                                </button>
+                        {/* Content Area */}
+                        {filter === 'analytics' ? (
+                            <div className="flex-1 overflow-auto custom-scrollbar p-6">
+                                <ProfileListAnalytics profiles={profiles} />
                             </div>
-                        </div>
+                        ) : (
+                            <>
+                                {/* Profiles Table */}
+                                <div className="flex-1 overflow-auto custom-scrollbar p-1">
+                                    <table className="w-full text-left text-sm border-spacing-y-2 border-separate px-4">
+                                        <thead className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider sticky top-0 bg-white dark:bg-zinc-900 z-10">
+                                            <tr>
+                                                <th className="p-4 w-12 pb-2"></th>
+                                                <th className="p-4 pb-2">Profile Name</th>
+                                                <th className="p-4 pb-2">Group</th>
+                                                <th className="p-4 pb-2">Role / Title</th>
+                                                <th className="p-4 pb-2">Created</th>
+                                                <th className="p-4 w-12 pb-2"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="space-y-2">
+                                            {loading ? (
+                                                [1, 2, 3].map((i) => (
+                                                    <tr key={i} className="animate-pulse">
+                                                        <td className="p-4"><div className="w-4 h-4 bg-muted rounded"></div></td>
+                                                        <td className="p-4"><div className="w-32 h-4 bg-muted rounded"></div></td>
+                                                        <td className="p-4"><div className="w-20 h-4 bg-muted rounded"></div></td>
+                                                        <td className="p-4"><div className="w-24 h-4 bg-muted rounded"></div></td>
+                                                        <td className="p-4"><div className="w-20 h-4 bg-muted rounded"></div></td>
+                                                        <td className="p-4"></td>
+                                                    </tr>
+                                                ))
+                                            ) : filteredProfiles.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={6} className="p-12 text-center text-muted-foreground">
+                                                        <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-xl bg-muted/10">
+                                                            <User className="w-8 h-8 text-muted-foreground/50 mb-3" />
+                                                            <p>No profiles found.</p>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ) : (
+                                                filteredProfiles.map((profile) => (
+                                                    <tr
+                                                        key={profile._id?.toString()}
+                                                        onClick={filter === 'active' ? () => onSelectProfile(profile._id!.toString()) : undefined}
+                                                        onDoubleClick={filter === 'active' ? () => onEditProfile(profile._id!.toString()) : undefined}
+                                                        className={`group transition-all cursor-pointer rounded-xl relative ${selectedProfileId === profile._id?.toString()
+                                                            ? 'bg-primary/5 shadow-sm ring-1 ring-primary/20 z-10'
+                                                            : 'hover:bg-muted/40'
+                                                            }`}
+                                                    >
+                                                        <td className="p-4 rounded-l-xl"><input type="checkbox" className="rounded border-gray-300 accent-primary" /></td>
+                                                        <td className="p-4">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shadow-sm transition-colors ${selectedProfileId === profile._id?.toString() ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'}`}>
+                                                                    {profile.fullName.charAt(0)}
+                                                                </div>
+                                                                <span className={`font-semibold ${selectedProfileId === profile._id?.toString() ? 'text-primary' : ''}`}>
+                                                                    {profile.fullName}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4">
+                                                            {profile.groupId ? (
+                                                                (() => {
+                                                                    const group = groups.find(g => g._id?.toString() === profile.groupId);
+                                                                    const colorData = group
+                                                                        ? (availableColors.find(c => c.value === group.color) || availableColors[0])
+                                                                        : availableColors[0];
+
+                                                                    return (
+                                                                        <span className={`${colorData.light} ${colorData.text} px-2.5 py-1 rounded-md text-xs font-bold border ${colorData.border} dark:bg-opacity-10`}>
+                                                                            {group?.name || 'Unknown Group'}
+                                                                        </span>
+                                                                    );
+                                                                })()
+                                                            ) : (
+                                                                <span className="text-muted-foreground text-xs italic">No Group</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="p-4 text-muted-foreground font-medium">{profile.jobTitle || 'N/A'}</td>
+                                                        <td className="p-4 text-muted-foreground">{new Date(profile.createdAt).toLocaleDateString()}</td>
+                                                        <td className="p-4 relative rounded-r-xl">
+                                                            {filter === 'active' ? (
+                                                                <>
+                                                                    <button
+                                                                        onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === profile._id?.toString() ? null : profile._id!.toString()); }}
+                                                                        className={`p-2 rounded-lg transition-colors ${activeMenu === profile._id?.toString() ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-white hover:text-foreground hover:shadow-sm'}`}
+                                                                    >
+                                                                        <MoreVertical className="w-4 h-4" />
+                                                                    </button>
+
+                                                                    {/* Dropdown Menu */}
+                                                                    {activeMenu === profile._id?.toString() && (
+                                                                        <div className="absolute right-12 top-2 w-60 bg-card/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl z-50 animate-in fade-in zoom-in-95 overflow-hidden origin-top-right ring-1 ring-black/5">
+                                                                            <div className="p-2 space-y-1">
+                                                                                <button
+                                                                                    onClick={(e) => { e.stopPropagation(); onEditProfile(profile._id!.toString()); setActiveMenu(null); }}
+                                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground hover:bg-accent rounded-xl transition-colors"
+                                                                                >
+                                                                                    <Edit2 className="w-4 h-4" /> Edit Profile
+                                                                                </button>
+
+                                                                                <div className="h-px bg-border/50 my-1 mx-2" />
+
+                                                                                {/* Groups Submenu Section */}
+                                                                                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">Move to Group</div>
+
+                                                                                {groups.map(g => (
+                                                                                    <button
+                                                                                        key={g._id?.toString()}
+                                                                                        onClick={(e) => { e.stopPropagation(); handleMoveToGroup(profile._id!.toString(), g._id!.toString()); setActiveMenu(null); }}
+                                                                                        className={`w-full flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${profile.groupId === g._id?.toString() ? 'text-primary bg-primary/5 font-semibold' : 'text-foreground hover:bg-accent'}`}
+                                                                                    >
+                                                                                        <Folder className="w-3.5 h-3.5" />
+                                                                                        {g.name}
+                                                                                        {profile.groupId === g._id?.toString() && <Check className="w-3 h-3 ml-auto" />}
+                                                                                    </button>
+                                                                                ))}
+
+                                                                                <button
+                                                                                    onClick={(e) => {
+                                                                                        e.stopPropagation();
+                                                                                        setProfileToMove(profile._id!.toString());
+                                                                                        setNewGroupName(`${profile.company || profile.fullName}'s Team`);
+                                                                                        setShowGroupModal(true);
+                                                                                        setActiveMenu(null);
+                                                                                    }}
+                                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
+                                                                                >
+                                                                                    <FolderPlus className="w-4 h-4" /> New Group
+                                                                                </button>
+
+                                                                                {profile.groupId && (
+                                                                                    <button
+                                                                                        onClick={(e) => { e.stopPropagation(); handleMoveToGroup(profile._id!.toString(), null); setActiveMenu(null); }}
+                                                                                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors"
+                                                                                    >
+                                                                                        <X className="w-4 h-4" /> Ungroup
+                                                                                    </button>
+                                                                                )}
+
+                                                                                <div className="h-px bg-border/50 my-1 mx-2" />
+
+                                                                                <button
+                                                                                    onClick={(e) => { e.stopPropagation(); handleDelete(profile._id!.toString()); setActiveMenu(null); }}
+                                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors font-medium"
+                                                                                >
+                                                                                    <Trash2 className="w-4 h-4" /> Move to Trash
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={(e) => { e.stopPropagation(); handleRestore(profile._id!.toString()); }}
+                                                                    className="p-2 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg transition-colors"
+                                                                    title="Restore"
+                                                                >
+                                                                    <RotateCcw className="w-4 h-4" />
+                                                                </button>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Pagination Footer */}
+                                <div className="p-4 border-t border-border/40 bg-muted/20 flex items-center justify-between">
+                                    <span className="text-xs text-muted-foreground">Showing {filteredProfiles.length} profiles</span>
+                                    <div className="flex gap-2">
+                                        <button className="p-2 border border-border rounded-lg hover:bg-white transition-all disabled:opacity-50">
+                                            <ChevronLeft className="w-4 h-4" />
+                                        </button>
+                                        <button className="p-2 border border-border rounded-lg hover:bg-white transition-all disabled:opacity-50">
+                                            <ChevronRight className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
 
                     </div>
                 </div>
@@ -528,6 +581,22 @@ export default function ProfileList({ onSelectProfile, onEditProfile, onCreatePr
                                     onChange={e => setNewGroupName(e.target.value)}
                                     className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all font-medium"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Default Brand Kit (Optional)</label>
+                                <select
+                                    value={selectedBrandKitId}
+                                    onChange={(e) => setSelectedBrandKitId(e.target.value)}
+                                    className="w-full bg-muted/50 border border-border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all font-medium text-sm mb-6 appearance-none"
+                                >
+                                    <option value="">No Brand Kit (Standard Theme)</option>
+                                    {brandKits.map(kit => (
+                                        <option key={kit._id?.toString()} value={kit._id?.toString()}>
+                                            {kit.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div>

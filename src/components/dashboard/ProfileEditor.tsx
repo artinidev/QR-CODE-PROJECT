@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Profile } from '@/types/models';
-import { Loader2, Save, User, Mail, Globe, Linkedin, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Loader2, Save, User, Mail, Globe, Linkedin, Eye, EyeOff, ArrowLeft, X, Check, RotateCw, ZoomIn } from 'lucide-react';
+import Cropper from 'react-easy-crop';
+import { Point, Area } from 'react-easy-crop';
 
 interface ProfileEditorProps {
     profileId: string | null;
@@ -15,6 +17,14 @@ export default function ProfileEditor({ profileId, onBack, onSaveSuccess }: Prof
     const [loading, setLoading] = useState(!!profileId);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+    // Crop State
+    const [imageSrc, setImageSrc] = useState<string | null>(null);
+    const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [rotation, setRotation] = useState(0);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+    const [isCropping, setIsCropping] = useState(false);
 
     useEffect(() => {
         if (profileId) {
@@ -158,15 +168,15 @@ export default function ProfileEditor({ profileId, onBack, onSaveSuccess }: Prof
                                     onChange={(e) => {
                                         const file = e.target.files?.[0];
                                         if (file) {
-                                            if (file.size > 2 * 1024 * 1024) {
-                                                alert('File size must be less than 2MB');
-                                                return;
-                                            }
                                             const reader = new FileReader();
-                                            reader.onloadend = () => {
-                                                setProfile(prev => ({ ...prev, photo: reader.result as string }));
-                                            };
                                             reader.readAsDataURL(file);
+                                            reader.onload = () => {
+                                                setImageSrc(reader.result as string);
+                                                setIsCropping(true);
+                                                setZoom(1);
+                                                setRotation(0);
+                                                setCrop({ x: 0, y: 0 });
+                                            };
                                         }
                                     }}
                                 />
@@ -333,6 +343,206 @@ export default function ProfileEditor({ profileId, onBack, onSaveSuccess }: Prof
                     </button>
                 </div>
             </form>
-        </div>
+
+            {/* Crop Modal */}
+            {
+                isCropping && imageSrc && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                        <div className="bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+                            <div className="p-4 border-b border-border flex justify-between items-center bg-muted/30">
+                                <h3 className="font-bold flex items-center gap-2">
+                                    <User className="w-5 h-5 text-primary" />
+                                    Adjust Profile Photo
+                                </h3>
+                                <button onClick={() => setIsCropping(false)} className="p-2 hover:bg-muted rounded-full">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="relative w-full h-[400px] bg-black">
+                                <Cropper
+                                    image={imageSrc}
+                                    crop={crop}
+                                    zoom={zoom}
+                                    rotation={rotation}
+                                    aspect={1}
+                                    onCropChange={setCrop}
+                                    onCropComplete={(croppedArea, croppedAreaPixels) => setCroppedAreaPixels(croppedAreaPixels)}
+                                    onZoomChange={setZoom}
+                                    onRotationChange={setRotation}
+                                />
+                            </div>
+
+                            <div className="p-6 space-y-6 bg-white dark:bg-zinc-900">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                                            <ZoomIn className="w-4 h-4" /> Zoom
+                                        </label>
+                                        <input
+                                            type="range"
+                                            value={zoom}
+                                            min={1}
+                                            max={3}
+                                            step={0.1}
+                                            aria-labelledby="Zoom"
+                                            onChange={(e) => setZoom(Number(e.target.value))}
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                                            <RotateCw className="w-4 h-4" /> Rotation
+                                        </label>
+                                        <input
+                                            type="range"
+                                            value={rotation}
+                                            min={0}
+                                            max={360}
+                                            step={1}
+                                            aria-labelledby="Rotation"
+                                            onChange={(e) => setRotation(Number(e.target.value))}
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                                    <button
+                                        onClick={() => setIsCropping(false)}
+                                        className="px-6 py-2.5 rounded-xl font-bold bg-muted hover:bg-muted/80 text-muted-foreground transition-colors text-sm"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (croppedAreaPixels && imageSrc) {
+                                                try {
+                                                    const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels, rotation);
+                                                    setProfile(prev => ({ ...prev, photo: croppedImage }));
+                                                    setIsCropping(false);
+                                                    setImageSrc(null); // Cleanup
+                                                } catch (e) {
+                                                    console.error(e);
+                                                    alert('Failed to crop image');
+                                                }
+                                            }
+                                        }}
+                                        className="px-6 py-2.5 bg-primary text-primary-foreground rounded-xl font-bold hover:bg-primary/90 transition-all text-sm flex items-center gap-2"
+                                    >
+                                        <Check className="w-4 h-4" />
+                                        Apply Photo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
+}
+
+// Utility for creating the cropped image
+const createImage = (url: string): Promise<HTMLImageElement> =>
+    new Promise((resolve, reject) => {
+        const image = new Image();
+        image.addEventListener('load', () => resolve(image));
+        image.addEventListener('error', (error) => reject(error));
+        image.setAttribute('crossOrigin', 'anonymous');
+        image.src = url;
+    });
+
+function getRadianAngle(degreeValue: number) {
+    return (degreeValue * Math.PI) / 180;
+}
+
+// Returns the new bounding area of a rotated rectangle
+function rotateSize(width: number, height: number, rotation: number) {
+    const rotRad = getRadianAngle(rotation);
+    return {
+        width:
+            Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
+        height:
+            Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height),
+    };
+}
+
+async function getCroppedImg(
+    imageSrc: string,
+    pixelCrop: Area,
+    rotation = 0,
+    flip = { horizontal: false, vertical: false }
+): Promise<string> {
+    const image = await createImage(imageSrc);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+        throw new Error('No 2d context');
+    }
+
+    const rotRad = getRadianAngle(rotation);
+
+    // calculate bounding box of the rotated image
+    const { width: bBoxWidth, height: bBoxHeight } = rotateSize(
+        image.width,
+        image.height,
+        rotation
+    );
+
+    // set canvas size to match the bounding box
+    canvas.width = bBoxWidth;
+    canvas.height = bBoxHeight;
+
+    // translate canvas context to a central location to allow rotating and flipping around the center
+    ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
+    ctx.rotate(rotRad);
+    ctx.scale(flip.horizontal ? -1 : 1, flip.vertical ? -1 : 1);
+    ctx.translate(-image.width / 2, -image.height / 2);
+
+    // draw rotated image
+    ctx.drawImage(image, 0, 0);
+
+    // croppedAreaPixels values are bounding box relative
+    // extract the cropped image using these values
+    const data = ctx.getImageData(
+        pixelCrop.x,
+        pixelCrop.y,
+        pixelCrop.width,
+        pixelCrop.height
+    );
+
+    // set canvas width to final desired crop size - this will clear existing context
+    canvas.width = pixelCrop.width;
+    canvas.height = pixelCrop.height;
+
+    // paste generated rotate image at the top left corner
+    ctx.putImageData(data, 0, 0);
+
+    // Optimize: Resize to 800x800 max if larger
+    const MAX_SIZE = 800;
+    if (canvas.width > MAX_SIZE || canvas.height > MAX_SIZE) {
+        const tempCanvas = document.createElement('canvas');
+        let newWidth = canvas.width;
+        let newHeight = canvas.height;
+
+        if (newWidth > newHeight) {
+            newHeight *= MAX_SIZE / newWidth;
+            newWidth = MAX_SIZE;
+        } else {
+            newWidth *= MAX_SIZE / newHeight;
+            newHeight = MAX_SIZE;
+        }
+
+        tempCanvas.width = newWidth;
+        tempCanvas.height = newHeight;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx?.drawImage(canvas, 0, 0, newWidth, newHeight);
+
+        return tempCanvas.toDataURL('image/jpeg', 0.8);
+    }
+
+    // Return compressed JPEG
+    return canvas.toDataURL('image/jpeg', 0.8);
 }

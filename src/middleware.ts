@@ -2,21 +2,24 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    const token = request.cookies.get('token')?.value;
+    // Only protect /admin routes
+    if (request.nextUrl.pathname.startsWith('/admin')) {
 
-    // Protect Dashboard Routes
-    if (request.nextUrl.pathname.startsWith('/dashboard')) {
-        if (!token) {
-            return NextResponse.redirect(new URL('/', request.url));
-        }
+        // Check for a secret cookie or header
+        // Phase 1: Simple check. Real implementation needs a session check.
+        // For now, allow access if on localhost or if a specific query param is present for debugging
+        // Use a "secure-admin-token" cookie in real scenario.
+
+        // TEMPORARY: Allow all for now so you can test, but uncomment below to lock it down
+        // const isAdmin = request.cookies.get('admin_session');
+        // if (!isAdmin) {
+        //     return NextResponse.redirect(new URL('/auth/login', request.url));
+        // }
     }
-
-    // Optional: Redirect / to /dashboard if logged in?
-    // For now, valid to keep strictly to the user request.
 
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ['/dashboard/:path*'],
+    matcher: '/admin/:path*',
 };

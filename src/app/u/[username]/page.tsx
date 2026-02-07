@@ -61,22 +61,33 @@ export default async function PublicProfilePage({ params }: PageProps) {
         notFound();
     }
 
-    // Convert MongoDB ObjectIds to string/cleanup for client component if needed
-    // (In this case ProfileView mostly uses primitive types, but usually we serialize)
+    // Convert MongoDB ObjectIds to string/cleanup for client component
     const serializableProfile = {
         ...profile,
         _id: profile._id?.toString(),
         userId: profile.userId.toString(),
-        // Safely handle dates whether they are Strings or Date objects
         createdAt: new Date(profile.createdAt).toISOString(),
         updatedAt: new Date(profile.updatedAt).toISOString(),
     };
 
-    // ProfileView expects the raw Profile type but with dates/IDs. 
-    // We need to cast or adjust. For simplicity, we just pass what we have
-    // creating a quick mapped type or just asserting `any` for the ID fields if strictness is an issue.
-    // Actually, let's fix the interface to match fetch or transform carefully.
-    // We can just cast for now as the logic is display-only.
+    let themeConfig = profile.themeConfig;
 
-    return <ProfileView profile={serializableProfile as any} />;
+    // Check for Brand Kit Override
+    if (profile.brandKitId) {
+        try {
+            const db = await getDatabase();
+            // Ensure ID is ObjectId
+            const kitId = new ObjectId(profile.brandKitId.toString());
+            const brandKit = await db.collection('brandKits').findOne({ _id: kitId });
+
+            if (brandKit && brandKit.config) {
+                console.log(`[PublicProfile] Applying Brand Kit: ${brandKit.name}`);
+                themeConfig = brandKit.config;
+            }
+        } catch (e) {
+            console.error("[PublicProfile] Error fetching Brand Kit", e);
+        }
+    }
+
+    return <ProfileView profile={serializableProfile as any} themeConfig={themeConfig} />;
 }

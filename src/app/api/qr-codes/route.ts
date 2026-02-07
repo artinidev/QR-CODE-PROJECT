@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+function verifyToken(request: NextRequest) {
+    const token = request.cookies.get('token')?.value;
+    if (!token) return null;
+    try {
+        return jwt.verify(token, JWT_SECRET) as { userId: string };
+    } catch (e) {
+        return null;
+    }
+}
 
 // Generate a unique short code for QR
 function generateShortCode(): string {
@@ -14,13 +27,14 @@ function generateShortCode(): string {
 
 export async function POST(req: NextRequest) {
     try {
+        const decoded = verifyToken(req);
+        if (!decoded) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const userId = decoded.userId;
+
         const body = await req.json();
         const { profileId, targetUrl, name, color, isDynamic } = body;
-
-        // In a real app we'd validate the session/user here. 
-        // For now, assume profileId is allowed if provided, or fallback to a default if not.
-        // If strict profileId requirement is needed:
-        // if (!profileId || !ObjectId.isValid(profileId)) ...
 
         const db = await getDatabase();
         const qrCodesCollection = db.collection('qr_codes');
@@ -38,7 +52,8 @@ export async function POST(req: NextRequest) {
         // Create new QR code entry
         const newQrCode = {
             code,
-            // If profileId is optional for free users, handle that. Assuming required for now or mocked.
+            userId: new ObjectId(userId),
+            // If profileId is optional for free users, handle that.
             profileId: profileId && ObjectId.isValid(profileId) ? new ObjectId(profileId) : null,
             targetUrl: targetUrl || 'https://example.com', // The real destination
             name: name || 'Untitled QR',
@@ -65,8 +80,6 @@ export async function POST(req: NextRequest) {
         }
 
         // Determine Base URL
-        // 1. Env Var (Best for Prod/ngrok)
-        // 2. Request Host (Fallback)
         let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
         if (!baseUrl) {
             const host = req.headers.get('host');
@@ -99,6 +112,12 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
+        const decoded = verifyToken(req);
+        if (!decoded) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const userId = decoded.userId;
+
         const body = await req.json();
         const { id, targetUrl, name, color } = body;
 
@@ -109,10 +128,17 @@ export async function PUT(req: NextRequest) {
         const db = await getDatabase();
         const qrCodesCollection = db.collection('qr_codes');
 
+        // Ensure user owns this QR
+        const existingQR = await qrCodesCollection.findOne({ _id: new ObjectId(id), userId: new ObjectId(userId) });
+        if (!existingQR) {
+            return NextResponse.json({ error: 'QR code not found or unauthorized' }, { status: 404 });
+        }
+
         const updateFields: any = {};
         if (targetUrl) updateFields.targetUrl = targetUrl;
         if (name) updateFields.name = name;
         if (color) updateFields.color = color;
+        updateFields.updatedAt = new Date();
 
         if (Object.keys(updateFields).length === 0) {
             return NextResponse.json({ message: 'No fields to update' });
@@ -122,10 +148,6 @@ export async function PUT(req: NextRequest) {
             { _id: new ObjectId(id) },
             { $set: updateFields }
         );
-
-        if (result.matchedCount === 0) {
-            return NextResponse.json({ error: 'QR code not found' }, { status: 404 });
-        }
 
         return NextResponse.json({ success: true, message: 'QR code updated successfully' });
 
@@ -137,6 +159,12 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
     try {
+        const decoded = verifyToken(req);
+        if (!decoded) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const userId = decoded.userId;
+
         const { searchParams } = new URL(req.url);
         const id = searchParams.get('id');
         const permanent = searchParams.get('permanent') === 'true';
@@ -148,22 +176,25 @@ export async function DELETE(req: NextRequest) {
         const db = await getDatabase();
         const qrCodesCollection = db.collection('qr_codes');
 
+        // Ensure user owns this QR
+        const matchQuery = { _id: new ObjectId(id), userId: new ObjectId(userId) };
+
         if (permanent) {
             // Permanent delete
-            const result = await qrCodesCollection.deleteOne({ _id: new ObjectId(id) });
+            const result = await qrCodesCollection.deleteOne(matchQuery);
             if (result.deletedCount === 0) {
-                return NextResponse.json({ error: 'QR code not found' }, { status: 404 });
+                return NextResponse.json({ error: 'QR code not found or unauthorized' }, { status: 404 });
             }
             return NextResponse.json({ success: true, message: 'QR code permanently deleted' });
         } else {
-            // Soft delete - set deletedAt timestamp
+            // Soft delete
             const result = await qrCodesCollection.updateOne(
-                { _id: new ObjectId(id) },
+                matchQuery,
                 { $set: { deletedAt: new Date() } }
             );
 
             if (result.matchedCount === 0) {
-                return NextResponse.json({ error: 'QR code not found' }, { status: 404 });
+                return NextResponse.json({ error: 'QR code not found or unauthorized' }, { status: 404 });
             }
 
             return NextResponse.json({ success: true, message: 'QR code moved to trash' });
@@ -178,6 +209,12 @@ export async function DELETE(req: NextRequest) {
 // Get QR codes (List or Single)
 export async function GET(req: NextRequest) {
     try {
+        const decoded = verifyToken(req);
+        if (!decoded) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+        const userId = decoded.userId;
+
         const { searchParams } = new URL(req.url);
         const profileId = searchParams.get('profileId');
         const includeDeleted = searchParams.get('includeDeleted') === 'true';
@@ -186,7 +223,7 @@ export async function GET(req: NextRequest) {
         const db = await getDatabase();
         const qrCodesCollection = db.collection('qr_codes');
 
-        let query: any = {};
+        let query: any = { userId: new ObjectId(userId) };
         if (profileId && ObjectId.isValid(profileId)) {
             query.profileId = new ObjectId(profileId);
         }

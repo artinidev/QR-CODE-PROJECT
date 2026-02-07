@@ -24,6 +24,22 @@ export default function DashboardHeader() {
         { label: 'Themes', href: '/dashboard/themes' }
     ];
 
+    const [usage, setUsage] = useState<{ scans: number, limit: number } | null>(null);
+
+    React.useEffect(() => {
+        fetch('/api/user/credits')
+            .then(res => res.json())
+            .then(data => {
+                if (data.credits) {
+                    setUsage({
+                        scans: data.credits.scans,
+                        limit: 100
+                    });
+                }
+            })
+            .catch(err => console.error('Failed to load credits:', err));
+    }, []);
+
     return (
         <header className="sticky top-0 z-50">
             <div className="max-w-[1600px] mx-auto py-4">
@@ -61,6 +77,17 @@ export default function DashboardHeader() {
 
                     {/* Right Section */}
                     <div className="flex items-center gap-4">
+
+                        {/* Usage Stats (Free Plan) */}
+                        {usage && (
+                            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-full">
+                                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                                <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                                    {usage.scans} / {usage.limit} Scans
+                                </span>
+                            </div>
+                        )}
+
                         {/* Search */}
                         <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl w-64">
                             <Search className="w-4 h-4 text-gray-400 dark:text-gray-500" />

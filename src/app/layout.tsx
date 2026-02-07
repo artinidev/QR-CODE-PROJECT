@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,13 +23,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       {/* suppressHydrationWarning is needed for next-themes/theme-provider handling of classes */}
       <body className={`${poppins.className} antialiased min-h-screen bg-background text-foreground`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          storageKey="pdi-theme"
-        >
-          {children}
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            storageKey="pdi-theme"
+          >
+            {children}
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

@@ -32,7 +32,9 @@ async function getLocationFromIP(ip: string) {
     try {
         // Skip for localhost/private IPs
         if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
-            return { country: 'Local', city: 'Local', ip };
+            // Default to roughly center of world or user's likely dev location if needed
+            // For now, returning 0,0 signals "unknown/local"
+            return { country: 'Local', city: 'Local', latitude: 0, longitude: 0, ip };
         }
 
         const response = await fetch(`https://ipapi.co/${ip}/json/`, {
@@ -40,18 +42,20 @@ async function getLocationFromIP(ip: string) {
         });
 
         if (!response.ok) {
-            return { country: 'Unknown', city: 'Unknown', ip };
+            return { country: 'Unknown', city: 'Unknown', latitude: 0, longitude: 0, ip };
         }
 
         const data = await response.json();
         return {
             country: data.country_name || 'Unknown',
             city: data.city || 'Unknown',
+            latitude: data.latitude || 0,
+            longitude: data.longitude || 0,
             ip
         };
     } catch (error) {
         console.error('Error fetching location:', error);
-        return { country: 'Unknown', city: 'Unknown', ip };
+        return { country: 'Unknown', city: 'Unknown', latitude: 0, longitude: 0, ip };
     }
 }
 
@@ -89,7 +93,7 @@ export async function POST(req: NextRequest) {
             device,
             browser,
             os,
-            location,
+            location, // Now includes lat/long
             referrer,
             userAgent
         };

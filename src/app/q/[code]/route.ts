@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabase } from '@/lib/mongodb';
+import { parseUserAgent, getLocationFromIP } from '@/lib/tracking';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ code: string }> }) {
     try {
@@ -27,11 +28,19 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             return NextResponse.json({ error: `QR Code not found for code: ${code}` }, { status: 404 });
         }
 
-        // Basic Tracking (Simplified to avoid crashes)
+        // Rich Tracking
         try {
             const userAgent = request.headers.get('user-agent') || 'Unknown';
-            const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'Unknown';
+            const forwarded = request.headers.get('x-forwarded-for');
+            const ip = forwarded ? forwarded.split(',')[0] : '127.0.0.1'; // Fallback
             const referrer = request.headers.get('referer') || 'Direct';
+
+            // Parse User Agent & Location
+            const { device, browser, os } = parseUserAgent(userAgent);
+
+            // Get location (non-blocking if possible, but we need data)
+            // Note: In serverless/edge, awaiting fetch adds latency. For now we await it.
+            const location = await getLocationFromIP(ip);
 
             const scanEvent = {
                 qrCodeId: qrCode._id,
@@ -39,14 +48,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                 userAgent,
                 ip,
                 referrer,
-                // Add simplified device info to prevent breaking existing schema if possible
-                device: userAgent.includes('Mobile') ? 'Mobile' : 'Desktop',
-                location: { ip } // Minimal location
+                device,   // Mobile, Desktop, Tablet
+                os,       // iOS, Android, macOS...
+                browser,  // Chrome, Safari...
+                location  // { city, country, ip }
             };
 
             const scansCollection = db.collection('scans');
 
-            // Fire and forget
+            // Fire and forget insert
             scansCollection.insertOne(scanEvent).catch(err => console.error('Failed to insert scan:', err));
 
             qrCodesCollection.updateOne(
@@ -59,7 +69,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
         } catch (trackError) {
             console.error('Scan tracking setup failed:', trackError);
-            // Non-blocking
         }
 
         // Campaign Logic
@@ -85,8 +94,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
             // If 'always_primary', we do nothing and let it go to destination
         }
 
-        // Ensure valid absolute URL
-        if (!destination.startsWith('http://') && !destination.startsWith('https://')) {
+        // Handle Relative URLs (e.g. /u/username)
+        if (destination.startsWith('/')) {
+            const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+            destination = `${baseUrl}${destination}`;
+        }
+        // Handle Domain without protocol (e.g. google.com)
+        else if (!destination.startsWith('http://') && !destination.startsWith('https://')) {
             destination = `https://${destination}`;
         }
 

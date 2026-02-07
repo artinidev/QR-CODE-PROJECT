@@ -40,12 +40,13 @@ export interface User {
 }
 
 export interface Group {
-    _id?: ObjectId;
+    _id?: ObjectId | string;
     userId: ObjectId;
     name: string;
     description?: string;
     profileCount: number;
     color?: string;
+    defaultBrandKitId?: string;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -59,6 +60,10 @@ export interface Profile {
     jobTitle?: string;
     company?: string;
     photo?: string;
+
+    // Branding
+    brandKitId?: ObjectId | string;
+    themeConfig?: any; // Allow overriding locally if needed, or caching the config
 
     // Contact Information
     email?: string;
@@ -119,6 +124,29 @@ export interface PlatformSettings {
         email: boolean;
         socialLinks: boolean;
     };
+    updatedAt: Date;
+}
+
+export interface ThemeConfig {
+    id?: string;
+    name?: string;
+    primaryColor: string;
+    backgroundColor: string;
+    backgroundAnimation: 'none' | 'blob' | 'grid' | 'particles' | 'waves';
+    cardStyle: 'glass' | 'flat' | 'neumorphic' | 'outline';
+    // Company Assets
+    logoUrl?: string;
+    coverUrl?: string;
+    fontFamily?: string;
+}
+
+export interface BrandKit {
+    _id?: ObjectId | string;
+    userId: ObjectId | string;
+    name: string;
+    config: ThemeConfig;
+    isDefault: boolean;
+    createdAt: Date;
     updatedAt: Date;
 }
 

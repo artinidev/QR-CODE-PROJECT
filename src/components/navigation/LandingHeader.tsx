@@ -1,43 +1,66 @@
 "use client"
 
 import React, { useState } from 'react'
-import { Zap, Rocket, User, Share2, Briefcase, CreditCard, BarChart3, Users } from 'lucide-react'
+import { User, BarChart3, QrCode, Megaphone, Palette } from 'lucide-react'
 import { MegaMenuDropdown } from './MegaMenu'
 import { ThemeToggle } from '../ThemeToggle'
+import { LanguageSelector } from '../LanguageSelector'
 import { LoginModal } from '../auth/LoginModal'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 export function LandingHeader() {
     const [isLoginOpen, setLoginOpen] = useState(false)
 
-    // --- HOME MENU DATA ---
-    const homeMegaMenu = [
-        {
-            category: 'Available Layouts',
-            items: [
-                { label: 'Landing Page 1', desc: 'Current Design', icon: Zap, href: '/' },
-                { label: 'Landing Page 2', desc: 'Smart QR 3D', icon: Rocket, href: '/design/smart-qr' },
-                { label: 'Landing Page 3', desc: 'Tech Motion Network', icon: Share2, href: '/design/tech-motion' },
-                { label: 'Landing Page 4', desc: 'Coming Soon', icon: User, href: '#' },
-            ]
-        }
-    ]
+
+
+    const { t } = useLanguage()
 
     // --- FEATURES MENU DATA ---
     const personalMegaMenu = [
         {
-            category: 'Build Identity',
+            category: t.nav.features,
             items: [
-                { label: 'My Profiles', desc: 'Manage public pages', icon: User, href: '/dashboard/profile' },
-                { label: 'Smart Resume', desc: 'CV & Portfolio builder', icon: Briefcase, href: '/dashboard/resume' },
-                { label: 'Digital Card', desc: 'NFC & QR Business Card', icon: CreditCard, href: '/dashboard/card' },
-            ]
-        },
-        {
-            category: 'Grow & Connect',
-            items: [
-                { label: 'Analytics', desc: 'Track your reach', icon: BarChart3, href: '/dashboard/analytics' },
-                { label: 'Contacts', desc: 'Manage leads', icon: Users, href: '/dashboard/contacts' },
-                { label: 'Share', desc: 'Social integrations', icon: Share2, href: '/dashboard/share' },
+                {
+                    label: t.home.profiles_badge,
+                    desc: t.home.profiles_title + ' ' + t.home.profiles_highlight,
+                    icon: User,
+                    href: '/dashboard/profile',
+                    previewTitle: t.home.profiles_title,
+                    previewDesc: t.home.profiles_desc
+                },
+                {
+                    label: t.home.smart_title,
+                    desc: t.home.smart_desc.substring(0, 30) + '...',
+                    icon: QrCode,
+                    href: '/dashboard/qr',
+                    previewTitle: t.home.smart_title,
+                    previewDesc: t.home.smart_desc
+                },
+                {
+                    label: t.home.analytics_badge,
+                    desc: t.home.analytics_desc.substring(0, 30) + '...',
+                    icon: BarChart3,
+                    href: '/dashboard/analytics',
+                    previewTitle: t.home.analytics_title,
+                    previewDesc: t.home.analytics_desc
+                },
+                {
+                    label: 'Marketing',
+                    desc: t.nav.create_identity,
+                    icon: Megaphone,
+                    href: '/dashboard/marketing-qr',
+                    previewTitle: 'Marketing Campaigns',
+                    previewDesc: t.nav.create_identity,
+                    previewCta: t.common.learn_more
+                },
+                {
+                    label: 'Themes',
+                    desc: t.nav.create_identity,
+                    icon: Palette,
+                    href: '/dashboard/themes',
+                    previewTitle: 'Theme Store',
+                    previewDesc: t.nav.create_identity
+                },
             ]
         }
     ]
@@ -51,45 +74,38 @@ export function LandingHeader() {
                         alt="SCANEX"
                         className="w-10 h-10"
                     />
-                    <span className="text-xl font-bold tracking-tight">SCANEX</span>
+                    <span className="text-xl font-bold tracking-tight">{t.common.scanex}</span>
                 </div>
 
                 {/* --- NAVIGATION CENTER --- */}
                 <nav className="hidden lg:flex items-center gap-2">
+
+                    <a href="/" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">{t.nav.home}</a>
                     <MegaMenuDropdown
-                        label="Home"
-                        menuData={homeMegaMenu}
-                        cta={{
-                            title: 'New Design?',
-                            desc: 'We are constantly adding new high-quality landing pages.',
-                            label: 'View All',
-                            href: '#'
-                        }}
-                        transparentMode={true}
-                    />
-                    <MegaMenuDropdown
-                        label="Features"
+                        label={t.nav.features}
                         menuData={personalMegaMenu}
                         cta={{
-                            title: 'Start Building',
-                            desc: 'Create your digital identity today.',
-                            label: 'Get Started',
+                            title: t.nav.start_building,
+                            desc: t.nav.create_identity,
+                            label: t.common.get_started,
                             href: '/auth/signup'
                         }}
                         transparentMode={true}
                     />
-                    <a href="#" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">Pricing</a>
-                    <a href="#" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">Enterprise</a>
-                    <a href="#" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">About</a>
+                    <a href="/pricing" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">{t.nav.pricing}</a>
+                    <a href="/enterprise" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">{t.nav.enterprise}</a>
+                    <a href="/about" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">{t.nav.about}</a>
                 </nav>
 
-                <div className="flex items-center gap-4">
+
+                <div className="flex items-center gap-2 md:gap-4">
+                    <LanguageSelector />
                     <ThemeToggle />
                     <button
                         onClick={() => setLoginOpen(true)}
                         className="px-6 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-black font-bold rounded-lg hover:-translate-y-0.5 transition-transform shadow-lg hover:shadow-xl"
                     >
-                        Sign In
+                        {t.common.sign_in}
                     </button>
                 </div>
             </header>
