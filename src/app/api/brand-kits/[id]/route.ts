@@ -11,14 +11,15 @@ function verifyToken(request: NextRequest) {
     return jwt.verify(token, JWT_SECRET) as { userId: string };
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const decoded = verifyToken(req);
+        const { id } = await params;
         const db = await getDatabase();
 
         let query;
         try {
-            query = { _id: new ObjectId(params.id), userId: new ObjectId(decoded.userId) };
+            query = { _id: new ObjectId(id), userId: new ObjectId(decoded.userId) };
         } catch (e) {
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         }
@@ -36,16 +37,17 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const decoded = verifyToken(req);
+        const { id } = await params;
         const updates = await req.json();
         delete updates._id;
         delete updates.userId;
 
         const db = await getDatabase();
         const userId = new ObjectId(decoded.userId);
-        const kitId = new ObjectId(params.id);
+        const kitId = new ObjectId(id);
 
         if (updates.isDefault) {
             await db.collection('brandKits').updateMany(
@@ -70,14 +72,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         const decoded = verifyToken(req);
+        const { id } = await params;
         const db = await getDatabase();
         const userId = new ObjectId(decoded.userId);
 
         const result = await db.collection('brandKits').deleteOne({
-            _id: new ObjectId(params.id),
+            _id: new ObjectId(id),
             userId
         });
 

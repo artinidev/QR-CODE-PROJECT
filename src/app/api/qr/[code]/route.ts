@@ -7,10 +7,10 @@ import { getDatabase } from '@/lib/mongodb';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { code: string } }
+    { params }: { params: Promise<{ code: string }> }
 ) {
     try {
-        const { code } = params;
+        const { code } = await params;
 
         if (!code) {
             return NextResponse.json({ error: 'Code is required' }, { status: 400 });

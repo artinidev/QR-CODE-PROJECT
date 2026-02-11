@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import {
     EyeIcon,
     QrCodeIcon,
@@ -49,7 +49,7 @@ export default function AnalyticsOverview() {
 
     const { metrics, topPerformers, deviceStats, osStats, locationStats } = data || {};
 
-    const containerVariants = {
+    const containerVariants: Variants = {
         hidden: { opacity: 0 },
         show: {
             opacity: 1,
@@ -59,7 +59,7 @@ export default function AnalyticsOverview() {
         }
     };
 
-    const itemVariants = {
+    const itemVariants: Variants = {
         hidden: { opacity: 0, y: 20, scale: 0.95 },
         show: {
             opacity: 1,

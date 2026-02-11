@@ -69,7 +69,7 @@ export default function PerformanceChart({ title = 'Performance Overview' }: Per
                     padding: 15,
                     font: {
                         size: 12,
-                        weight: '600'
+                        weight: 'bold' as const
                     }
                 }
             },
@@ -79,7 +79,7 @@ export default function PerformanceChart({ title = 'Performance Overview' }: Per
                 borderRadius: 8,
                 titleFont: {
                     size: 14,
-                    weight: 'bold'
+                    weight: 'bold' as const
                 },
                 bodyFont: {
                     size: 13

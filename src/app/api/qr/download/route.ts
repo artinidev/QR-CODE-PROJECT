@@ -27,12 +27,14 @@ export async function GET(request: NextRequest) {
             contentType = 'image/svg+xml';
             extension = 'svg';
         } else if (format === 'jpeg') {
-            buffer = await QRCode.toBuffer(url, {
-                type: 'jpeg',
+            const dataUrl = await QRCode.toDataURL(url, {
+                type: 'image/jpeg',
                 margin: 2,
                 width: 1024,
                 color: { dark: '#000000', light: '#FFFFFF' }
             });
+            const base64Data = dataUrl.replace(/^data:image\/jpeg;base64,/, '');
+            buffer = Buffer.from(base64Data, 'base64');
             contentType = 'image/jpeg';
             extension = 'jpg';
         } else {
@@ -49,7 +51,7 @@ export async function GET(request: NextRequest) {
 
         const safeFilename = filename.replace(/[^a-z0-9-_]/gi, '_');
 
-        return new NextResponse(buffer, {
+        return new NextResponse(buffer as any, {
             headers: {
                 'Content-Type': contentType,
                 'Content-Disposition': `attachment; filename="${safeFilename}.${extension}"`,

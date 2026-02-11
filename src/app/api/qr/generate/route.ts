@@ -27,25 +27,31 @@ export async function GET(request: NextRequest) {
         let extension: string;
 
         if (format === 'svg') {
-            buffer = await QRCode.toString(data, { ...options, type: 'svg' });
-            return new NextResponse(buffer, {
+            const svgString = await QRCode.toString(data, { ...options, type: 'svg' }) as unknown as string;
+            return new NextResponse(svgString, {
                 headers: {
                     'Content-Type': 'image/svg+xml',
                     'Content-Disposition': `attachment; filename="qrcode.svg"`,
                 },
             });
         } else if (format === 'jpeg' || format === 'jpg') {
-            buffer = await QRCode.toBuffer(data, { ...options, type: 'jpeg' });
-            contentType = 'image/jpeg';
-            extension = 'jpg';
+            const dataUrl = await QRCode.toDataURL(data, { ...options, type: 'image/jpeg' }) as unknown as string;
+            if (dataUrl) {
+                const base64Data = dataUrl.replace(/^data:image\/jpeg;base64,/, '');
+                buffer = Buffer.from(base64Data, 'base64');
+                contentType = 'image/jpeg';
+                extension = 'jpg';
+            } else {
+                throw new Error('Failed to generate JPEG');
+            }
         } else {
             // Default to PNG
-            buffer = await QRCode.toBuffer(data, { ...options, type: 'png' });
+            buffer = await QRCode.toBuffer(data, { ...options, type: 'png' }) as unknown as Buffer;
             contentType = 'image/png';
             extension = 'png';
         }
 
-        return new NextResponse(buffer, {
+        return new NextResponse(buffer as any, {
             headers: {
                 'Content-Type': contentType,
                 'Content-Disposition': `attachment; filename="qrcode.${extension}"`,

@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Eye, QrCode, User, TrendingUp } from 'lucide-react';
+import { Eye, QrCode, User, TrendingUp, LucideIcon } from 'lucide-react';
 
 interface StatBadgeProps {
-    icon: React.ElementType;
+    icon: LucideIcon;
     label: string;
     value: string;
     delay?: number;

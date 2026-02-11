@@ -2,7 +2,7 @@
 
 import { Profile, ThemeConfig } from '@/types/models';
 import React, { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, AnimatePresence, Variants } from 'framer-motion';
 import { Mail, Phone, Linkedin, Share2, MessageCircle, UserPlus, Globe, Twitter, Instagram, ChevronRight, Download, Send } from 'lucide-react';
 import { ThemeToggle } from '../ThemeToggle';
 
@@ -14,7 +14,7 @@ interface ProfileViewProps {
 }
 
 // --- Animation Variants ---
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
@@ -25,7 +25,7 @@ const containerVariants = {
     }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
         y: 0,

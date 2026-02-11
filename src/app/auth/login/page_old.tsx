@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LoginHero } from '@/components/auth/LoginHero';
 
-function LoginForm() {
+export default function LoginPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const registered = searchParams.get('registered');
@@ -190,13 +190,5 @@ function LoginForm() {
                 </div>
             </div>
         </div>
-    );
-}
-
-export default function LoginPage() {
-    return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-            <LoginForm />
-        </Suspense>
     );
 }

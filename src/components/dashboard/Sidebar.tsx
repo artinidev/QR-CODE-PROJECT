@@ -2,7 +2,7 @@
 
 import { Home, User, Settings, LogOut, BarChart2, QrCode, Users, Palette, Layout, Smartphone, Megaphone } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
 const navItems = [
@@ -18,6 +18,16 @@ const navItems = [
 
 export default function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    };
 
     const [usage, setUsage] = useState<{ scans: number, limit: number } | null>(null);
 

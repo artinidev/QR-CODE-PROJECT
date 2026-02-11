@@ -62,7 +62,7 @@ export default function LineChartCard({ title, data, height = 350 }: LineChartCa
                     font: {
                         size: 12,
                         family: "'Inter', sans-serif",
-                        weight: 'bold'
+                        weight: 'bold' as const
                     },
                     color: '#94A3B8' // Slate-400 works on both, compatible with Zinc
                 }
@@ -74,7 +74,7 @@ export default function LineChartCard({ title, data, height = 350 }: LineChartCa
                 titleFont: {
                     size: 13,
                     family: "'Inter', sans-serif",
-                    weight: '600'
+                    weight: 'bold' as const
                 },
                 bodyFont: {
                     size: 12,

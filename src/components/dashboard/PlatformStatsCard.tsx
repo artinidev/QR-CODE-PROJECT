@@ -31,7 +31,7 @@ export default function PlatformStatsCard({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
-            whileHover={{ y: -4, shadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}
+            whileHover={{ y: -4, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}
             className="bg-white dark:bg-zinc-900 rounded-2xl p-6 shadow-md border border-gray-100 dark:border-white/5 hover:shadow-xl transition-all duration-300"
         >
             <div className="flex items-start justify-between mb-4">
@@ -40,8 +40,8 @@ export default function PlatformStatsCard({
                 </div>
                 {trend !== undefined && (
                     <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold ${isPositive
-                            ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
-                            : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                        ? 'bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400'
+                        : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
                         }`}>
                         {isPositive ? (
                             <TrendingUp className="w-3 h-3" />
