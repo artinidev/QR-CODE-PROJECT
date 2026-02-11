@@ -13,6 +13,7 @@ interface SmartMetric {
     desktop: number;
     total: number;
 }
+//jillo
 
 interface SmartQR {
     id: string;
@@ -45,6 +46,7 @@ export default function SmartQRPage() {
     useEffect(() => {
         setSmartQRs([
             {
+
                 id: 'sqr_123',
                 appName: 'My Awesome App',
                 appStoreUrl: 'https://apps.apple.com/app/id123456',
