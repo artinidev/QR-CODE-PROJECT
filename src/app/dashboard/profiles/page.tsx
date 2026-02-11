@@ -2,7 +2,7 @@ import React from 'react';
 import ProfileManager from '@/components/dashboard/ProfileManager';
 
 export const metadata = {
-    title: 'My Profiles - PDI Platform',
+    title: 'My Profiles - SCANEX',
 };
 
 export default function ProfilesPage() {

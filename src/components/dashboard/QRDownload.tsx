@@ -47,30 +47,35 @@ export default function QRDownload({ profileId }: QRDownloadProps) {
                 setProfile(pData);
 
                 // 2. Get/Create QR Code
-                let qRes = await fetch(`/api/qr-codes?profileId=${profileId}`);
+                const qRes = await fetch(`/api/qr-codes?profileId=${profileId}`);
                 let qData;
 
                 if (qRes.ok) {
-                    qData = await qRes.json();
-                } else {
-                    // Create if not exists
+                    const listData = await qRes.json();
+                    if (listData.qrCodes && listData.qrCodes.length > 0) {
+                        qData = listData.qrCodes[0];
+                    }
+                }
+
+                // If not found or empty list, create new one
+                if (!qData) {
                     const createRes = await fetch('/api/qr-codes', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ profileId })
+                        body: JSON.stringify({
+                            profileId: pData._id,
+                            targetUrl: `/u/${pData.username}`, // Set correct target URL
+                            name: `${pData.fullName} Profile QR`
+                        })
                     });
+
                     if (!createRes.ok) throw new Error('Failed to create QR');
                     qData = await createRes.json();
                 }
 
-                // 3. Force Local IP for Dev Environment (Crucial for Mobile Scanning)
-                const isDev = typeof window !== 'undefined' &&
-                    (window.location.hostname === 'localhost' ||
-                        window.location.hostname === '0.0.0.0' ||
-                        window.location.hostname === '127.0.0.1');
-
-                const baseUrl = isDev ? 'http://192.168.3.3:3000' : window.location.origin;
-                qData.fullUrl = `${baseUrl}/qr/${qData.code}`;
+                // 3. Use Configured Public URL (ngrok) or fall back to origin
+                const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+                qData.fullUrl = `${baseUrl}/q/${qData.code}`;
 
                 setQrCodeData(qData);
 

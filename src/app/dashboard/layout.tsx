@@ -1,5 +1,6 @@
 import React from 'react';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import PageTransition from '@/components/dashboard/PageTransition';
 
 export default function DashboardLayout({
     children,
@@ -11,7 +12,7 @@ export default function DashboardLayout({
             {/* Main Content Area */}
             <div className="max-w-[1600px] mx-auto p-6 md:p-8 overflow-y-auto">
                 <DashboardHeader />
-                {children}
+                <PageTransition>{children}</PageTransition>
             </div>
         </div>
     );

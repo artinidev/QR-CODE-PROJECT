@@ -1,20 +1,63 @@
-'use client';
+"use client"
 
-import * as React from 'react';
-import { Moon, Sun } from 'lucide-react';
-import { useTheme } from '@/components/ThemeProvider';
+import React, { useEffect, useState } from "react"
+import { Moon, Sun, Laptop } from "lucide-react"
+import { useTheme } from "next-themes"
+import { motion, AnimatePresence } from "framer-motion"
 
 export function ThemeToggle() {
-    const { theme, setTheme } = useTheme();
+    const { setTheme, theme, resolvedTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    // Avoid hydration mismatch
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!mounted) {
+        return (
+            <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-white/10 animate-pulse" />
+        )
+    }
+
+    const toggleTheme = () => {
+        if (resolvedTheme === 'dark') {
+            setTheme('light')
+        } else {
+            setTheme('dark')
+        }
+    }
 
     return (
         <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="rounded-full p-2 hover:bg-accent hover:text-accent-foreground transition-colors relative"
+            onClick={toggleTheme}
+            className="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
             aria-label="Toggle theme"
         >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute top-2 left-2 h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <AnimatePresence mode="wait" initial={false}>
+                {resolvedTheme === 'dark' ? (
+                    <motion.div
+                        key="moon"
+                        initial={{ scale: 0.5, rotate: -90, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        exit={{ scale: 0.5, rotate: 90, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Moon className="w-5 h-5" />
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="sun"
+                        initial={{ scale: 0.5, rotate: 90, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        exit={{ scale: 0.5, rotate: -90, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <Sun className="w-5 h-5" />
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <span className="sr-only">Toggle theme</span>
         </button>
-    );
+    )
 }

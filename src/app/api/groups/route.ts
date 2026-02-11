@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
             name: body.name,
             description: body.description || '',
             color: body.color || 'blue',
+            defaultBrandKitId: body.defaultBrandKitId,
             profileCount: 0,
             createdAt: new Date(),
             updatedAt: new Date(),

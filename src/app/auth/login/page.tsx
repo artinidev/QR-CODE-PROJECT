@@ -186,7 +186,7 @@ export default function LoginPage() {
 
                 {/* Footer Element */}
                 <div className="absolute bottom-6 text-xs text-slate-400">
-                    &copy; 2024 PDI Platform. All rights reserved.
+                    &copy; 2024 SCANEX. All rights reserved.
                 </div>
             </div>
         </div>

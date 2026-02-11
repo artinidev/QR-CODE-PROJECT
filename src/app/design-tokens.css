@@ -1,0 +1,64 @@
+:root {
+    /* Color System */
+    --color-bg-app: #9AA3B5;
+    /* outer background (soft desaturated blue) */
+    --color-bg-surface: #F4F6F8;
+    /* main cards / containers */
+    --color-bg-card: #FFFFFF;
+    --color-primary: #111827;
+    /* main text */
+    --color-secondary: #6B7280;
+    /* muted text */
+    --color-accent: #4F46E5;
+    /* primary action / highlights */
+    --color-success: #22C55E;
+    --color-warning: #F59E0B;
+    --color-border: #E5E7EB;
+
+    /* Typography */
+    --font-family: Inter, system-ui, sans-serif;
+
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-base: 16px;
+    --text-lg: 18px;
+    --text-xl: 20px;
+    --text-2xl: 24px;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.10);
+
+    /* Layout */
+    --sidebar-width: 260px;
+    --topbar-height: 64px;
+    --card-gap: 24px;
+    --container-max-width: 1200px;
+}
+
+/* Apply design system globally */
+* {
+    font-family: var(--font-family);
+}

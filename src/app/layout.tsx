@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; // Use Inter for modern look
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 
-const inter = Inter({ subsets: ["latin"] });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ['300', '400', '500', '600', '700', '800', '900']
+});
 
 export const metadata: Metadata = {
-  title: "PDI Platform",
+  title: "SCANEX",
   description: "Your Professional Digital Identity",
 };
 
@@ -18,13 +22,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       {/* suppressHydrationWarning is needed for next-themes/theme-provider handling of classes */}
-      <body className={`${inter.className} antialiased min-h-screen bg-background text-foreground`}>
-        <ThemeProvider
-          defaultTheme="system"
-          storageKey="pdi-theme"
-        >
-          {children}
-        </ThemeProvider>
+      <body className={`${poppins.className} antialiased min-h-screen bg-background text-foreground`}>
+        <LanguageProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            storageKey="pdi-theme"
+          >
+            {children}
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

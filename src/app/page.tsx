@@ -1,194 +1,129 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { LoginHero } from '@/components/auth/LoginHero';
+import React, { useRef } from 'react';
+import { motion, useScroll, useSpring } from 'framer-motion';
+import { Zap, ArrowRight, UserCircle2, QrCode, BarChart3, MapPin } from 'lucide-react';
+import { Footer } from '@/components/navigation/Footer';
+import { CinematicVisuals } from '@/components/landing/CinematicVisuals';
+import { LandingHeader } from '@/components/navigation/LandingHeader';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
-export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const registered = searchParams.get('registered');
+export default function LandingPage() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+  // Track scroll of the giant container
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Invalid credentials');
-      }
-
-      // Successful login
-      router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 60, damping: 20 });
 
   return (
-    <div className="min-h-screen w-full flex overflow-hidden bg-white dark:bg-slate-950">
-      {/* Left Side - Hero/Art */}
-      <div className="hidden md:block w-1/2 lg:w-[60%] relative bg-blue-50 overflow-hidden">
-        <LoginHero />
-      </div>
+    <div ref={containerRef} className="bg-white dark:bg-[#050505] min-h-[500vh] text-slate-900 dark:text-white font-sans selection:bg-indigo-500/30">
 
-      {/* Right Side - Form */}
-      <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center items-center p-8 relative">
-        <div className="w-full max-w-md space-y-8">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-center"
-          >
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Welcome back
-            </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-              Please sign in to your PDI account.
-            </p>
-          </motion.div>
+      <LandingHeader />
 
-          {/* Notification for registration */}
-          <AnimatePresence>
-            {registered && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg text-sm flex items-center"
-              >
-                <span className="mr-2">🎉</span> Account created successfully! Please sign in.
-              </motion.div>
-            )}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm flex items-center"
-              >
-                <span className="mr-2">⚠️</span> {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
+      <div className="w-full flex">
 
-          {/* Form */}
-          <motion.form
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="mt-8 space-y-6"
-            onSubmit={handleSubmit}
-          >
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
-                  placeholder="name@example.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
+        {/* --- LEFT: SCROLLABLE CONTENT (5x screen height) --- */}
+        <div className="w-full lg:w-1/2 flex flex-col relative z-20">
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Password
-                  </label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                />
-              </div>
-            </div>
+          {/* SECTION 1: INTRO (0 - 0.2) */}
+          <Section
+            icon={<Zap className="w-6 h-6 text-yellow-500" />}
+            badge={t.home.hero_badge}
+            title={t.home.hero_title}
+            highlight={t.home.hero_highlight}
+            desc={t.home.hero_desc}
+          />
 
-            <div>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                disabled={loading}
-                className="flex w-full justify-center rounded-lg bg-blue-600 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Signing in...
-                  </span>
-                ) : (
-                  'Sign in'
-                )}
-              </motion.button>
-            </div>
-          </motion.form>
+          {/* SECTION 2: PROFILES (0.2 - 0.4) */}
+          <Section
+            icon={<UserCircle2 className="w-6 h-6 text-blue-500" />}
+            badge={t.home.profiles_badge}
+            title={t.home.profiles_title}
+            highlight={t.home.profiles_highlight}
+            desc={t.home.profiles_desc}
+            color="text-blue-600 dark:text-blue-500"
+          />
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-center"
-          >
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Don't have an account?{' '}
-              <Link href="/auth/signup" className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">
-                Create an account
-              </Link>
-            </p>
-          </motion.div>
+          {/* SECTION 3: SMART QR (0.4 - 0.6) */}
+          <Section
+            icon={<QrCode className="w-6 h-6 text-purple-500" />}
+            badge={t.home.smart_badge}
+            title={t.home.smart_title}
+            highlight={t.home.smart_highlight}
+            desc={t.home.smart_desc}
+            color="text-purple-600 dark:text-purple-500"
+          />
+
+          {/* SECTION 4: ANALYTICS (0.6 - 0.8) */}
+          <Section
+            icon={<BarChart3 className="w-6 h-6 text-green-500" />}
+            badge={t.home.analytics_badge}
+            title={t.home.analytics_title}
+            highlight={t.home.analytics_highlight}
+            desc={t.home.analytics_desc}
+            color="text-green-600 dark:text-green-500"
+          />
+
+          {/* SECTION 5: LIVE TRACKING (0.8 - 1.0) */}
+          <Section
+            icon={<MapPin className="w-6 h-6 text-red-500" />}
+            badge={t.home.tracking_badge}
+            title={t.home.tracking_title}
+            highlight={t.home.tracking_highlight}
+            desc={t.home.tracking_desc}
+            color="text-red-600 dark:text-red-500"
+          />
+
         </div>
 
-        {/* Footer Element */}
-        <div className="absolute bottom-6 text-xs text-slate-400">
-          &copy; {new Date().getFullYear()} PDI Platform. All rights reserved.
+        {/* --- RIGHT: STICKY VISUALS --- */}
+        <div className="hidden lg:block w-1/2 h-screen sticky top-0 bg-slate-50/50 dark:bg-zinc-900/50 overflow-hidden border-l border-slate-200 dark:border-white/5">
+
+          <div className="absolute inset-0 flex items-center justify-center perspective-1000">
+            <CinematicVisuals progress={smoothProgress} />
+          </div>
+
         </div>
       </div>
+      <Footer />
+    </div>
+  );
+}
+
+// --- CONTENT SECTION COMPONENT ---
+function Section({ icon, badge, title, highlight, desc, cta, color = "text-indigo-600 dark:text-indigo-500" }: any) {
+  const { t } = useLanguage();
+  return (
+    <div className="h-screen flex flex-col justify-center px-8 lg:pl-24 lg:pr-12 border-b border-transparent">
+      <motion.div
+        initial={{ opacity: 0, x: -50 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        viewport={{ margin: "-20%" }}
+      >
+        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm font-semibold mb-8 w-fit backdrop-blur-sm">
+          {icon}
+          <span className="dark:text-white">{badge}</span>
+        </div>
+
+        <h2 className="text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] mb-6">
+          {title} <br />
+          <span className={color}>{highlight}</span>
+        </h2>
+
+        <p className="text-xl text-slate-500 dark:text-slate-400 leading-relaxed max-w-md mb-10 font-medium">
+          {desc}
+        </p>
+
+        <button onClick={cta} className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-600/20 flex items-center gap-2 group">
+          {t.common.get_started} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+        </button>
+      </motion.div>
     </div>
   );
 }

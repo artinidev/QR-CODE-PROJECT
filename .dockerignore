@@ -1,0 +1,12 @@
+# Docker ignore file - excludes files from Docker build context
+node_modules
+npm-debug.log
+.next
+.git
+.gitignore
+README.md
+.env.local
+.env*.local
+.DS_Store
+*.pem
+.vercel
