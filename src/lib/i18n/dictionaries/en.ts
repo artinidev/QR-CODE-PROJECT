@@ -8,6 +8,7 @@ export const en = {
         read_docs: "Read Documentation",
         learn_more: "Learn More",
         copyright: "© 2026 SCANEX. All rights reserved.",
+        explore_analytics: "Explore Analytics",
     },
     nav: {
         home: "Home",
@@ -79,12 +80,23 @@ export const en = {
         title: "We are building the infrastructure for the",
         title_highlight: "physical web.",
         subtitle: "ScanEx creates the digital layer that connects products, places, and people. We believe every physical object should have a digital voice.",
-        story: {
-            title: "From Paper to Pixels",
-            p1: "It started with a simple question: Why are offline interactions so overly disconnected from our online lives?",
-            p2: "We realized that the QR code wasn't just a link—it was a gateway. A portal that could turn a static poster into a checkout flow, a billboard into a game, or a product label into a support channel.",
-            p3: "Today, ScanEx processes millions of interactions daily for brands that understand the value of the physical context. We are obsessively focused on speed, reliability, and the beautification of the humble QR code.",
-            figure: "Figure 1.0: The first prototype",
+        consumer_goods: {
+            title: "Enhance Your Consumer Goods with Smart QR Code Solutions",
+            subtitle: "QR Codes are transforming how consumer goods brands connect with customers — turning static packaging into dynamic digital experiences. By placing scannable codes on your products, you can inform, engage, and delight consumers while gaining valuable insights into their behavior.",
+            game_changer_badge: "Game Changer",
+            why_title: "Why QR Codes Are a Game-Changer in CPG",
+            why_desc: "With more shoppers using smartphones to scan codes on products, QR Codes have become a powerful tool for brands to bridge physical items and online interactions. They allow even limited packaging space to deliver rich digital content — from product details to promotions and support resources.",
+            benefits_title: "Real Benefits of QR Codes on Product Packaging",
+            benefits: [
+                { title: "Communicate Rich Product Details", desc: "Give your customers instant access to ingredient lists, usage tips, origin stories, or sustainability information — all without crowding your design." },
+                { title: "Collect Feedback Effortlessly", desc: "Use scan-linked forms to ask for reviews and opinions, so you gain real consumer insights that strengthen trust and help improve your products." },
+                { title: "Boost Brand Engagement", desc: "Connect product interactions to social media, loyalty programs, and community platforms. QR Codes make it easy for consumers to like, follow, and share." },
+                { title: "Attract New and Repeat Buyers", desc: "Redirect scanners to special offers, full product lines, or curated content — encouraging both first-time purchases and return visits." },
+                { title: "Track Consumer Interaction", desc: "Get valuable data on total scans, locations, and user behavior. These insights help you refine marketing tactics and better understand your audience." },
+                { title: "Improve Loyalty Programs", desc: "Make it seamless for customers to join loyalty initiatives, redeem points, and unlock rewards with a quick scan." },
+                { title: "Simplify Inventory Monitoring", desc: "Assign unique QR codes to products and streamline stock checks, reducing errors and improving operational accuracy." },
+                { title: "Provide Instant Support", desc: "Lead customers directly to support channels — phone, email or messaging — with zero hassle once they scan your code." }
+            ]
         },
         stats: {
             scans: { label: "Active Scans", desc: "Processed globally" },
@@ -111,6 +123,21 @@ export const en = {
             title: "Ready to bridge the gap?",
             primary: "Get Started Free",
             secondary: "Contact Sales",
+        },
+        use_cases: {
+            title: "Real-World Ways Your Business Can Use QR Codes",
+            subtitle: "Discover how versatile QR codes can transform interactions across different industries.",
+            items: [
+                { title: "Restaurants & Hospitality", desc: "Make dining smoother and more engaging by putting QR Codes on tables, menus, or signage — link to digital menus, customer feedback forms, special offers, or reservation pages to improve service and reduce wait times." },
+                { title: "Product Packaging & Consumer Goods", desc: "Let your products speak for themselves. Use QR Codes on packaging to instantly share detailed product info, how-to videos, testimonials, warranty details, and exclusive deals — all without cluttering the design." },
+                { title: "Real Estate Marketing", desc: "Enhance property listings with QR Codes that lead to virtual tours, photo galleries, price details, or contact forms — helping potential buyers access key info instantly and streamlining follow-ups." },
+                { title: "Retail Engagement", desc: "Use QR Codes in-store and in marketing materials to connect shoppers to online catalogs, loyalty programs, coupons, or review pages — boosting engagement and repeat visits." },
+                { title: "Education & Publishing", desc: "Bring learning materials to life by linking QR Codes to syllabi, e-books, videos, events, assignments, or interactive content — making it easier for students and readers to access resources." },
+                { title: "Nonprofit & Cause-Driven Campaigns", desc: "Support donations, volunteer sign-ups, awareness campaigns, and social media growth by placing QR Codes on flyers, brochures, and event banners — empowering supporters to engage in seconds." },
+                { title: "Digital Business Cards & Networking", desc: "Replace paper cards with a scannable QR Code that instantly shares contact details, portfolio links, social profiles, or signup forms — perfect for networking events or professional settings." },
+                { title: "Events & Promotions", desc: "Add QR Codes to posters, tickets, or banners so attendees can RSVP, get event schedules, join email lists, or access exclusive content — enhancing the participant experience." },
+                { title: "Campaign & Advertising Touchpoints", desc: "Put QR Codes on print ads, billboards, shopping bags, or receipts to turn offline impressions into online actions — from website visits and coupon unlocks to social follows and feedback submissions." }
+            ]
         }
     },
     pricing: {

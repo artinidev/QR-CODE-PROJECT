@@ -111,7 +111,7 @@ function Section({ icon, badge, title, highlight, desc, cta, color = "text-indig
           <span className="dark:text-white">{badge}</span>
         </div>
 
-        <h2 className="text-5xl lg:text-7xl font-black tracking-tight leading-[1.1] mb-6">
+        <h2 className="text-5xl lg:text-7xl font-semibold tracking-tight leading-[1.1] mb-6">
           {title} <br />
           <span className={color}>{highlight}</span>
         </h2>

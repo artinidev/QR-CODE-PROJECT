@@ -4,11 +4,12 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LoginHero } from '@/components/auth/LoginHero';
+import { Mail, Lock, Loader2, ArrowLeft } from 'lucide-react';
 
 function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
     const registered = searchParams.get('registered');
 
     const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ function LoginForm() {
             }
 
             // Successful login
-            router.push('/dashboard');
+            router.push(callbackUrl);
         } catch (err: any) {
             setError(err.message);
         } finally {
@@ -46,40 +47,55 @@ function LoginForm() {
     };
 
     return (
-        <div className="min-h-screen w-full flex overflow-hidden bg-white dark:bg-slate-950">
-            {/* Left Side - Hero/Art */}
-            <div className="hidden md:block w-1/2 lg:w-[60%] relative bg-blue-50 overflow-hidden">
-                <LoginHero />
+        <div className="min-h-screen w-full flex items-center justify-center relative bg-slate-50 dark:bg-zinc-950 overflow-hidden">
+
+            {/* Background Texture/Elements */}
+            <div className="absolute inset-0 z-0 opacity-20 dark:opacity-10 pointer-events-none">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#3b82f61a_1px,transparent_1px),linear-gradient(to_bottom,#3b82f61a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                {/* Glowing orbs similar to landing */}
+                <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-400/30 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 mix-blend-multiply dark:mix-blend-screen"></div>
+                <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-400/30 rounded-full blur-[120px] translate-x-1/2 translate-y-1/2 mix-blend-multiply dark:mix-blend-screen"></div>
             </div>
 
-            {/* Right Side - Form */}
-            <div className="w-full md:w-1/2 lg:w-[40%] flex flex-col justify-center items-center p-8 relative">
-                <div className="w-full max-w-md space-y-8">
-                    {/* Header */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="text-center"
-                    >
-                        <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                            Welcome back
-                        </h2>
-                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                            Please sign in to your PDI account
-                        </p>
-                    </motion.div>
+            {/* Back to Home Information */}
+            <Link href="/" className="absolute top-8 left-8 flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 z-50 transition-colors">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Home
+            </Link>
 
-                    {/* Notification for registration */}
+
+            {/* Centered Login Card */}
+            <motion.div
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.5, ease: "backOut" }}
+                className="w-full max-w-md relative z-10 p-6 md:p-8"
+            >
+                <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-white/5 rounded-3xl shadow-2xl p-8 md:p-10">
+
+                    {/* Header */}
+                    <div className="text-center mb-8">
+                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
+                            <Lock className="w-6 h-6" />
+                        </div>
+                        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">
+                            Welcome Back
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">
+                            Enter your credentials to access your dashboard.
+                        </p>
+                    </div>
+
+                    {/* Messages */}
                     <AnimatePresence>
                         {registered && (
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg text-sm flex items-center"
+                                className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-500/20 text-green-700 dark:text-green-300 px-4 py-3 rounded-xl text-sm flex items-center mb-6"
                             >
-                                <span className="mr-2">🎉</span> Account created successfully! Please sign in.
+                                <span className="mr-2">🎉</span> Account created! Please sign in.
                             </motion.div>
                         )}
                         {error && (
@@ -87,7 +103,7 @@ function LoginForm() {
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: 1, height: 'auto' }}
                                 exit={{ opacity: 0, height: 0 }}
-                                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm flex items-center"
+                                className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm flex items-center mb-6"
                             >
                                 <span className="mr-2">⚠️</span> {error}
                             </motion.div>
@@ -95,50 +111,38 @@ function LoginForm() {
                     </AnimatePresence>
 
                     {/* Form */}
-                    <motion.form
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2, duration: 0.5 }}
-                        className="mt-8 space-y-6"
-                        onSubmit={handleSubmit}
-                    >
-                        <div className="space-y-4">
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                    Email address
-                                </label>
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ml-1">Email Address</label>
+                            <div className="relative group">
+                                <Mail className="absolute left-3 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                                 <input
-                                    id="email"
-                                    name="email"
                                     type="email"
-                                    autoComplete="email"
                                     required
-                                    className="block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
-                                    placeholder="name@example.com"
+                                    className="w-full bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-500/50 text-slate-900 dark:text-white transition-all placeholder:text-slate-400"
+                                    placeholder="name@company.com"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 />
                             </div>
+                        </div>
 
-                            <div>
-                                <div className="flex items-center justify-between mb-1">
-                                    <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                                        Password
-                                    </label>
-                                    <Link
-                                        href="/auth/forgot-password"
-                                        className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-                                    >
-                                        Forgot password?
-                                    </Link>
-                                </div>
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center ml-1">
+                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Password</label>
+                                <Link
+                                    href="/auth/forgot-password"
+                                    className="text-xs font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                                >
+                                    Forgot password?
+                                </Link>
+                            </div>
+                            <div className="relative group">
+                                <Lock className="absolute left-3 top-3.5 w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                                 <input
-                                    id="password"
-                                    name="password"
                                     type="password"
-                                    autoComplete="current-password"
                                     required
-                                    className="block w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3 text-slate-900 dark:text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
+                                    className="w-full bg-slate-50 dark:bg-zinc-950/50 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 dark:focus:border-blue-500/50 text-slate-900 dark:text-white transition-all placeholder:text-slate-400"
                                     placeholder="••••••••"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -146,56 +150,52 @@ function LoginForm() {
                             </div>
                         </div>
 
-                        <div>
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                type="submit"
-                                disabled={loading}
-                                className="flex w-full justify-center rounded-lg bg-blue-600 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                            >
-                                {loading ? (
-                                    <span className="flex items-center">
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Signing in...
-                                    </span>
-                                ) : (
-                                    'Sign in'
-                                )}
-                            </motion.button>
-                        </div>
-                    </motion.form>
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            type="submit"
+                            disabled={loading}
+                            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Signing in...</span>
+                                </>
+                            ) : (
+                                'Sign In'
+                            )}
+                        </motion.button>
+                    </form>
 
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                        className="text-center"
-                    >
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                    <div className="mt-8 text-center">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                             Don't have an account?{' '}
-                            <Link href="/auth/signup" className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400">
+                            <Link href="/auth/signup" className="font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                 Create an account
                             </Link>
                         </p>
-                    </motion.div>
+                    </div>
+
                 </div>
 
-                {/* Footer Element */}
-                <div className="absolute bottom-6 text-xs text-slate-400">
-                    &copy; 2024 SCANEX. All rights reserved.
+                {/* Simple Footer */}
+                <div className="mt-6 text-center text-xs text-slate-400 dark:text-zinc-600">
+                    &copy; {new Date().getFullYear()} SCANEX. All rights reserved.
                 </div>
-            </div>
-        </div>
+
+            </motion.div >
+        </div >
     );
 }
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-zinc-950">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            </div>
+        }>
             <LoginForm />
         </Suspense>
     );

@@ -1,6 +1,7 @@
 import React from 'react';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import PageTransition from '@/components/dashboard/PageTransition';
+import DashboardTutorialWrapper from '@/components/onboarding/DashboardTutorialWrapper';
 
 export default function DashboardLayout({
     children,
@@ -14,6 +15,7 @@ export default function DashboardLayout({
                 <DashboardHeader />
                 <PageTransition>{children}</PageTransition>
             </div>
+            <DashboardTutorialWrapper />
         </div>
     );
 }

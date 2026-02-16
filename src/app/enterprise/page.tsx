@@ -133,39 +133,107 @@ function FeatureShowcase() {
                 </motion.div>
 
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8 }}
-                    className="bg-slate-50 dark:bg-[#0A0A0F] rounded-2xl border border-slate-200 dark:border-white/10 p-2 shadow-2xl"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{
+                        duration: 0.8, ease: "linear",
+                        repeatType: "loop"
+                    }}
+                    className="relative"
                 >
-                    {/* Simplified UI Representation: Analytics Dashboard */}
-                    <div className="bg-white dark:bg-[#05050A] rounded-xl p-6 aspect-[4/3] flex flex-col gap-4 overflow-hidden relative">
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="w-32 h-4 bg-slate-200 dark:bg-white/10 rounded" />
-                            <div className="flex gap-2">
-                                <div className="w-8 h-8 rounded bg-slate-100 dark:bg-white/5" />
-                                <div className="w-8 h-8 rounded bg-indigo-500" />
-                            </div>
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="flex-1 h-32 bg-slate-50 dark:bg-white/5 rounded border border-slate-100 dark:border-white/5" />
-                            <div className="flex-1 h-32 bg-slate-50 dark:bg-white/5 rounded border border-slate-100 dark:border-white/5" />
-                        </div>
-                        <div className="flex-1 bg-slate-50 dark:bg-white/5 rounded border border-slate-100 dark:border-white/5 p-4 flex items-end gap-2">
-                            {[40, 60, 45, 80, 55, 90, 70].map((h, i) => (
-                                <div key={i} className="flex-1 bg-indigo-500/20 rounded-t relative overflow-hidden" style={{ height: `${h}%` }}>
+                    {/* Frameless Container */}
+                    <div className="relative p-20">
+
+                        {/* Content */}
+                        <div className="relative flex flex-col items-center justify-center space-y-12">
+
+                            {/* QR Code with Expanding Rings */}
+                            <div className="relative flex items-center justify-center">
+
+                                {/* Expanding Data Rings */}
+                                {[0, 1, 2].map((i) => (
                                     <motion.div
-                                        initial={{ height: 0 }}
-                                        whileInView={{ height: '100%' }}
+                                        key={i}
+                                        style={{ scale: 1, opacity: 0 }}
+                                        animate={{
+                                            scale: [1, 2.5],
+                                            opacity: [0.3, 0]
+                                        }}
+                                        transition={{
+                                            duration: 3,
+                                            repeat: Infinity,
+                                            delay: i * 1,
+                                            ease: "linear",
+                                            repeatType: "loop"
+                                        }}
+                                        className="absolute w-64 h-64 rounded-full border-2 border-indigo-500 dark:border-indigo-400"
+                                    />
+                                ))}
+
+                                {/* QR Code with Pulse */}
+                                <motion.div
+                                    initial={{ scale: 0.8, opacity: 0 }}
+                                    whileInView={{ scale: 1, opacity: 1 }}
+                                    viewport={{ once: true }}
+                                    animate={{
+                                        scale: [1, 1.05, 1]
+                                    }}
+                                    transition={{
+                                        scale: {
+                                            duration: 3,
+                                            repeat: Infinity,
+                                            ease: "easeInOut"
+                                        },
+                                        opacity: { duration: 0.6 }
+                                    }}
+                                    className="relative z-10 w-64 h-64 bg-white dark:bg-slate-950 rounded-3xl border-2 border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-2xl"
+                                >
+                                    <QrCode className="w-48 h-48 text-slate-900 dark:text-white" />
+                                </motion.div>
+                            </div>
+
+                            {/* Counter Animation */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, delay: 0.3 }}
+                                className="text-center space-y-4"
+                            >
+                                {/* Number Counter */}
+                                <motion.div
+                                    initial={{ scale: 0.5 }}
+                                    whileInView={{ scale: 1 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8, delay: 0.5, type: "spring", stiffness: 100 }}
+                                    className="text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent"
+                                >
+                                    2,847
+                                </motion.div>
+
+                                <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
+                                    Total Scans Worldwide
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div className="w-64 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: "0%" }}
+                                        whileInView={{ width: "100%" }}
                                         viewport={{ once: true }}
-                                        transition={{ duration: 0.8, delay: i * 0.1, ease: 'easeOut' }}
-                                        className="w-full bg-indigo-500 rounded-t absolute bottom-0 left-0"
+                                        transition={{ duration: 2, delay: 0.8, ease: "easeInOut" }}
+                                        className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"
                                     />
                                 </div>
-                            ))}
+                            </motion.div>
+
                         </div>
                     </div>
                 </motion.div>
+
+
+
             </div>
         </section>
     );

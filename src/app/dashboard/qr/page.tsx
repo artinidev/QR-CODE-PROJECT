@@ -3,10 +3,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 import AdvancedQRGenerator from '@/components/dashboard/AdvancedQRGenerator';
 import AnalyticsView from '@/components/dashboard/AnalyticsView';
 import QRCodeDisplay, { QRCodeHandle } from '@/components/dashboard/QRCodeDisplay';
 import { Trash2, Smartphone, MapPin, Clock, BarChart3, QrCode, Download, Share2, Eye, Settings, Copy, CheckCircle, Search } from 'lucide-react';
+import { usePageTutorial } from '@/hooks/useTutorial';
+import { qrGeneratorSteps } from '@/components/onboarding/tutorialSteps';
 
 // Mock Type for saved QR
 interface SavedQR {
@@ -32,6 +35,9 @@ export default function QRStudioPage() {
     const [deletedQRs, setDeletedQRs] = useState<SavedQR[]>([]);
     const [showTrash, setShowTrash] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Tutorial State
+    const { runPageTutorial, completePageTutorial, skipPageTutorial } = usePageTutorial('qr-generator');
 
     // Filter & Search State
     const [searchQuery, setSearchQuery] = useState('');
@@ -225,6 +231,19 @@ export default function QRStudioPage() {
     const endIndex = startIndex + itemsPerPage;
     const paginatedQRs = filteredQRs.slice(startIndex, endIndex);
 
+    // Tutorial Callback Handler
+    const handleJoyrideCallback = (data: CallBackProps) => {
+        const { status } = data;
+        const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+
+        if (finishedStatuses.includes(status)) {
+            if (status === STATUS.FINISHED) {
+                completePageTutorial();
+            } else if (status === STATUS.SKIPPED) {
+                skipPageTutorial();
+            }
+        }
+    };
 
     return (
         <div className="space-y-8 pb-10">
@@ -723,6 +742,50 @@ export default function QRStudioPage() {
                     </div>
                 </div>
             )}
+
+            {/* Tutorial Component */}
+            <Joyride
+                steps={qrGeneratorSteps}
+                run={runPageTutorial}
+                callback={handleJoyrideCallback}
+                continuous
+                showProgress
+                showSkipButton
+                disableOverlayClose
+                disableCloseOnEsc
+                spotlightClicks
+                styles={{
+                    options: {
+                        primaryColor: '#6366f1',
+                        textColor: '#e2e8f0',
+                        backgroundColor: '#1e293b',
+                        overlayColor: 'rgba(0, 0, 0, 0.7)',
+                        arrowColor: '#1e293b',
+                        zIndex: 10000,
+                    },
+                    tooltip: {
+                        borderRadius: 12,
+                        padding: 0,
+                    },
+                    tooltipContainer: {
+                        textAlign: 'left',
+                    },
+                    buttonNext: {
+                        backgroundColor: '#6366f1',
+                        borderRadius: 8,
+                        padding: '8px 16px',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                    },
+                    buttonBack: {
+                        color: '#94a3b8',
+                        marginRight: 10,
+                    },
+                    buttonSkip: {
+                        color: '#64748b',
+                    },
+                }}
+            />
         </div>
     );
 }

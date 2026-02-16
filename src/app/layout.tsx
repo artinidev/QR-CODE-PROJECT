@@ -6,7 +6,8 @@ import { LanguageProvider } from "@/lib/i18n/LanguageContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ['300', '400', '500', '600', '700', '800', '900']
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-poppins',
 });
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       {/* suppressHydrationWarning is needed for next-themes/theme-provider handling of classes */}
-      <body className={`${poppins.className} antialiased min-h-screen bg-background text-foreground`}>
+      <body className={`${poppins.className} ${poppins.variable} antialiased min-h-screen bg-background text-foreground`}>
         <LanguageProvider>
           <ThemeProvider
             attribute="class"

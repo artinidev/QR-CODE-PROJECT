@@ -3,11 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Bell, Settings, LogOut, Moon, Sun } from 'lucide-react';
+import { Search, Bell, Settings, LogOut, Moon, Sun, BookOpen, Scale } from 'lucide-react';
+import { useTutorial } from '@/hooks/useTutorial';
 
 export default function DashboardHeader() {
     const pathname = usePathname();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const { restartTutorial } = useTutorial();
     const [isDarkMode, setIsDarkMode] = useState(false);
 
     const toggleDarkMode = () => {
@@ -41,7 +43,7 @@ export default function DashboardHeader() {
     }, []);
 
     return (
-        <header className="sticky top-0 z-50">
+        <header className="sticky top-0 z-50 dashboard-header">
             <div className="max-w-[1600px] mx-auto py-4">
                 <div className="flex items-center justify-between">
                     {/* Logo */}
@@ -110,12 +112,8 @@ export default function DashboardHeader() {
                             )}
                         </button>
 
-                        <button className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                            <Bell className="w-4 h-4 text-gray-600" />
-                        </button>
-
-                        <button className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-                            <Settings className="w-4 h-4 text-gray-600" />
+                        <button className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors">
+                            <Bell className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                         </button>
 
                         {/* Profile */}
@@ -148,10 +146,28 @@ export default function DashboardHeader() {
                                         </Link>
                                         <button
                                             onClick={() => {
+                                                setIsProfileOpen(false);
+                                                restartTutorial();
+                                            }}
+                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full text-left"
+                                        >
+                                            <BookOpen className="w-4 h-4" />
+                                            Tutorial
+                                        </button>
+                                        <Link
+                                            href="/legal"
+                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                        >
+                                            <Scale className="w-4 h-4" />
+                                            Legal
+                                        </Link>
+                                        <div className="border-t border-gray-200 my-1"></div>
+                                        <button
+                                            onClick={() => {
                                                 document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
                                                 window.location.href = '/';
                                             }}
-                                            className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+                                            className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
                                         >
                                             <LogOut className="w-4 h-4" />
                                             Sign Out

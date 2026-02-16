@@ -99,7 +99,7 @@ export default function AnalyticsCard() {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-gray-100 dark:border-white/5 h-full flex flex-col relative z-20"
+            className="analytics-card bg-white dark:bg-zinc-900 rounded-3xl p-8 border border-gray-100 dark:border-white/5 h-full flex flex-col relative z-20"
         >
             {/* Header */}
             <div className="flex items-start justify-between mb-8 z-20 relative">
@@ -145,8 +145,8 @@ export default function AnalyticsCard() {
                                             setShowRangeMenu(false);
                                         }}
                                         className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${range === r
-                                                ? 'bg-primary/10 text-primary'
-                                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800'
+                                            ? 'bg-primary/10 text-primary'
+                                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800'
                                             }`}
                                     >
                                         {r}

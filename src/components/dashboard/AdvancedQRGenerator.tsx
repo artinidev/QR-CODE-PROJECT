@@ -268,6 +268,7 @@ export default function AdvancedQRGenerator({ initialUrl = '', onSave }: Advance
                                         onChange={(e) => setTargetUrl(e.target.value)}
                                         className="w-full bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600"
                                         placeholder="https://example.com"
+                                        data-tutorial="url-input"
                                     />
                                     {isDynamic && (
                                         <div className="flex items-center gap-2">
@@ -315,7 +316,7 @@ export default function AdvancedQRGenerator({ initialUrl = '', onSave }: Advance
                 </div>
 
                 {/* Column 2: The Stage / Preview (5/12) */}
-                <div className="lg:col-span-5 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-zinc-950/50 rounded-2xl border border-gray-100/50 dark:border-white/5 p-6 relative group">
+                <div className="lg:col-span-5 flex flex-col items-center justify-center bg-gray-50/50 dark:bg-zinc-950/50 rounded-2xl border border-gray-100/50 dark:border-white/5 p-6 relative group" data-tutorial="qr-preview">
                     <div ref={ref} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 dark:border-none transform transition-transform group-hover:scale-105 duration-300" />
                     {isDynamic && (
                         <div className="mt-4 max-w-xs text-center">
@@ -372,7 +373,7 @@ export default function AdvancedQRGenerator({ initialUrl = '', onSave }: Advance
                                 {activeSection === 'color' ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                             </button>
                             {activeSection === 'color' && (
-                                <div className="p-2 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+                                <div className="p-2 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-white/5 flex items-center justify-between" data-tutorial="color-picker">
                                     <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer border-0" />
                                     <span className="text-[10px] font-mono text-gray-500 dark:text-gray-400 uppercase">{color}</span>
                                 </div>
@@ -386,7 +387,7 @@ export default function AdvancedQRGenerator({ initialUrl = '', onSave }: Advance
                                 {activeSection === 'logo' ? <ChevronUp className="w-3 h-3 text-gray-400" /> : <ChevronDown className="w-3 h-3 text-gray-400" />}
                             </button>
                             {activeSection === 'logo' && (
-                                <div className="p-3 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-white/5 space-y-3">
+                                <div className="p-3 bg-white dark:bg-zinc-900 border-t border-gray-100 dark:border-white/5 space-y-3" data-tutorial="logo-upload">
                                     <div className="flex items-center gap-2">
                                         <label className="flex-1 cursor-pointer bg-gray-50 dark:bg-zinc-950 border border-dashed border-gray-200 dark:border-white/10 rounded-lg p-2 text-center hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                                             <div className="flex flex-col items-center gap-1">
@@ -428,7 +429,7 @@ export default function AdvancedQRGenerator({ initialUrl = '', onSave }: Advance
                     </div>
 
                     <div className="pt-2 border-t border-gray-100 dark:border-white/5 space-y-2">
-                        <div className="flex gap-2">
+                        <div className="flex gap-2" data-tutorial="download-button">
                             {['PNG', 'SVG'].map((fmt) => (
                                 <button key={fmt} onClick={() => download(fmt.toLowerCase() as any)} className="flex-1 py-1.5 bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 rounded text-[9px] font-bold border border-gray-100 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-zinc-700">
                                     {fmt}

@@ -8,6 +8,7 @@ export const fr = {
         read_docs: "Lire la documentation",
         learn_more: "En savoir plus",
         copyright: "© 2026 SCANEX. Tous droits réservés.",
+        explore_analytics: "Explorer les Analyses",
     },
     nav: {
         home: "Accueil",
@@ -79,12 +80,23 @@ export const fr = {
         title: "Nous construisons l'infrastructure pour le",
         title_highlight: "web physique.",
         subtitle: "ScanEx crée la couche numérique qui connecte les produits, les lieux et les personnes. Nous croyons que chaque objet physique devrait avoir une voix numérique.",
-        story: {
-            title: "Du Papier aux Pixels",
-            p1: "Tout a commencé par une question simple : Pourquoi les interactions hors ligne sont-elles si déconnectées de nos vies en ligne ?",
-            p2: "Nous avons réalisé que le code QR n'était pas juste un lien — c'était une passerelle. Un portail pouvant transformer une affiche statique en un flux d'achat, un panneau d'affichage en jeu, ou une étiquette produit en canal de support.",
-            p3: "Aujourd'hui, ScanEx traite des millions d'interactions quotidiennes pour des marques qui comprennent la valeur du contexte physique. Nous sommes obsédés par la vitesse, la fiabilité et l'esthétique du modeste code QR.",
-            figure: "Figure 1.0 : Le premier prototype",
+        consumer_goods: {
+            title: "Valorisez Vos Produits de Grande Consommation avec des Solutions QR Code Intelligentes",
+            subtitle: "Les QR Codes transforment la façon dont les marques se connectent avec les clients — transformant des emballages statiques en expériences numériques dynamiques. Informez, engagez et ravissez vos consommateurs tout en obtenant des données précieuses.",
+            game_changer_badge: "Révolutionnaire",
+            why_title: "Pourquoi les QR Codes Changent la Donne pour les PGC",
+            why_desc: "Avec l'augmentation des scans mobiles en magasin, les QR Codes sont devenus un outil puissant pour faire le pont entre le physique et le numérique. Ils permettent de délivrer un contenu riche même sur un espace d'emballage limité — des détails du produit aux promotions exclusives.",
+            benefits_title: "Les Vrais Avantages des QR Codes sur les Emballages",
+            benefits: [
+                { title: "Communiquez des Détails Produits Riches", desc: "Donnez un accès instantané aux ingrédients, conseils d'utilisation, origines ou informations durables — sans surcharger votre design." },
+                { title: "Recueillez des Avis Sans Effort", desc: "Utilisez des formulaires liés au scan pour demander des avis et obtenir des insights réels qui renforcent la confiance." },
+                { title: "Boostez l'Engagement de Marque", desc: "Connectez les produits aux réseaux sociaux et programmes de fidélité. Facilitez les likes, les suivis et les partages." },
+                { title: "Attirez et Fidélisez les Clients", desc: "Redirigez vers des offres spéciales ou des gammes complètes pour encourager les premiers achats et les retours." },
+                { title: "Suivez les Interactions Consommateurs", desc: "Obtenez des données sur les scans et le comportement utilisateur pour affiner votre marketing et comprendre votre audience." },
+                { title: "Améliorez les Programmes de Fidélité", desc: "Facilitez l'adhésion aux programmes, l'échange de points et le déblocage de récompenses d'un simple scan." },
+                { title: "Simplifiez le Suivi des Stocks", desc: "Assignez des codes uniques pour rationaliser les vérifications de stock, réduire les erreurs et améliorer la précision." },
+                { title: "Offrez un Support Instantané", desc: "Guidez les clients directement vers le support — téléphone, email ou messagerie — sans aucun tracas." }
+            ]
         },
         stats: {
             scans: { label: "Scans Actifs", desc: "Traités mondialement" },
@@ -111,6 +123,21 @@ export const fr = {
             title: "Prêt à combler le fossé ?",
             primary: "Commencer Gratuitement",
             secondary: "Contacter les Ventes",
+        },
+        use_cases: {
+            title: "Applications Concrètes des QR Codes pour Votre Entreprise",
+            subtitle: "Découvrez comment les QR codes polyvalents peuvent transformer les interactions dans divers secteurs.",
+            items: [
+                { title: "Restaurants & Hôtellerie", desc: "Fluidifiez les repas en plaçant des QR codes sur les tables ou menus — lien vers menus numériques, avis clients, offres ou réservations pour réduire l'attente." },
+                { title: "Emballage Produit & Biens de Consommation", desc: "Laissez vos produits parler. Utilisez des QR codes sur l'emballage pour partager infos, vidéos, témoignages, garanties et offres exclusives sans encombrer le design." },
+                { title: "Marketing Immobilier", desc: "Enrichissez les annonces avec des QR codes menant à des visites virtuelles, galeries photos, prix ou formulaires de contact pour faciliter l'accès aux infos clés." },
+                { title: "Engagement Retail", desc: "Connectez les acheteurs en magasin aux catalogues en ligne, programmes de fidélité, coupons ou avis via QR codes pour booster l'engagement et les visites." },
+                { title: "Éducation & Édition", desc: "Animez les supports d'apprentissage en liant les QR codes aux syllabi, e-books, vidéos, devoirs ou contenus interactifs pour faciliter l'accès aux ressources." },
+                { title: "Associations & Causes", desc: "Soutenez les dons, inscriptions bénévoles et campagnes de sensibilisation en plaçant des QR codes sur flyers et bannières pour engager les supporters en quelques secondes." },
+                { title: "Cartes de Visite Numériques & Networking", desc: "Remplacez les cartes papier par un QR code scannable partageant instantanément contacts, portfolios ou liens sociaux — idéal pour le networking." },
+                { title: "Événements & Promotions", desc: "Ajoutez des QR codes aux affiches ou billets pour permettre aux participants de confirmer leur présence, voir le programme ou accéder à du contenu exclusif." },
+                { title: "Campagnes & Points de Contact Publicitaires", desc: "Mettez des QR codes sur pubs imprimées, panneaux ou reçus pour transformer les impressions hors ligne en actions en ligne — visites web, coupons, suivis sociaux." }
+            ]
         }
     },
     pricing: {

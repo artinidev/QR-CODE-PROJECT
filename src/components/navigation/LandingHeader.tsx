@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { User, BarChart3, QrCode, Megaphone, Palette } from 'lucide-react'
 import { MegaMenuDropdown } from './MegaMenu'
 import { ThemeToggle } from '../ThemeToggle'
@@ -10,8 +11,7 @@ import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 export function LandingHeader() {
     const [isLoginOpen, setLoginOpen] = useState(false)
-
-
+    const pathname = usePathname()
 
     const { t } = useLanguage()
 
@@ -21,14 +21,6 @@ export function LandingHeader() {
             category: t.nav.features,
             items: [
                 {
-                    label: t.home.profiles_badge,
-                    desc: t.home.profiles_title + ' ' + t.home.profiles_highlight,
-                    icon: User,
-                    href: '/dashboard/profile',
-                    previewTitle: t.home.profiles_title,
-                    previewDesc: t.home.profiles_desc
-                },
-                {
                     label: t.home.smart_title,
                     desc: t.home.smart_desc.substring(0, 30) + '...',
                     icon: QrCode,
@@ -37,12 +29,21 @@ export function LandingHeader() {
                     previewDesc: t.home.smart_desc
                 },
                 {
+                    label: t.home.profiles_badge,
+                    desc: t.home.profiles_title + ' ' + t.home.profiles_highlight,
+                    icon: User,
+                    href: '/dashboard/profiles',
+                    previewTitle: t.home.profiles_title,
+                    previewDesc: t.home.profiles_desc
+                },
+                {
                     label: t.home.analytics_badge,
                     desc: t.home.analytics_desc.substring(0, 30) + '...',
                     icon: BarChart3,
                     href: '/dashboard/analytics',
                     previewTitle: t.home.analytics_title,
-                    previewDesc: t.home.analytics_desc
+                    previewDesc: t.home.analytics_desc,
+                    previewCta: "Explore Analytics"
                 },
                 {
                     label: 'Marketing',
@@ -80,7 +81,15 @@ export function LandingHeader() {
                 {/* --- NAVIGATION CENTER --- */}
                 <nav className="hidden lg:flex items-center gap-2">
 
-                    <a href="/" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">{t.nav.home}</a>
+                    <a
+                        href="/"
+                        className={`px-4 py-2 text-sm font-bold transition-all rounded-lg ${pathname === '/'
+                                ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+                                : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
+                    >
+                        {t.nav.home}
+                    </a>
                     <MegaMenuDropdown
                         label={t.nav.features}
                         menuData={personalMegaMenu}
@@ -92,9 +101,33 @@ export function LandingHeader() {
                         }}
                         transparentMode={true}
                     />
-                    <a href="/pricing" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">{t.nav.pricing}</a>
-                    <a href="/enterprise" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">{t.nav.enterprise}</a>
-                    <a href="/about" className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors">{t.nav.about}</a>
+                    <a
+                        href="/pricing"
+                        className={`px-4 py-2 text-sm font-bold transition-all rounded-lg ${pathname === '/pricing'
+                                ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+                                : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
+                    >
+                        {t.nav.pricing}
+                    </a>
+                    <a
+                        href="/enterprise"
+                        className={`px-4 py-2 text-sm font-bold transition-all rounded-lg ${pathname === '/enterprise'
+                                ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+                                : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
+                    >
+                        {t.nav.enterprise}
+                    </a>
+                    <a
+                        href="/about"
+                        className={`px-4 py-2 text-sm font-bold transition-all rounded-lg ${pathname === '/about'
+                                ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+                                : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
+                    >
+                        {t.nav.about}
+                    </a>
                 </nav>
 
 

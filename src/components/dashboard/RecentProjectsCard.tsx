@@ -53,7 +53,7 @@ export default function RecentProjectsCard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-zinc-800 rounded-3xl p-6 border border-gray-100 dark:border-white/10 h-full"
+            className="recent-projects-card bg-white dark:bg-zinc-800 rounded-3xl p-6 border border-gray-100 dark:border-white/10 h-full"
         >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
