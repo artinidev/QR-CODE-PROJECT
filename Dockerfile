@@ -35,7 +35,7 @@ COPY --from=builder /app/.next/static ./.next/static
 
 # Copy scripts and install script dependencies
 COPY scripts ./scripts
-RUN npm install bcryptjs mongodb
+RUN npm install --legacy-peer-deps bcryptjs mongodb
 
 USER nextjs
 
